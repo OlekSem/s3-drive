@@ -1,7 +1,5 @@
 package org.example.springbootapi.Data.Seeding;
 
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.example.springbootapi.Data.Constants.RolesConstants;
@@ -15,33 +13,27 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Set;
 
-
 @Component
 @RequiredArgsConstructor
 public class AppSeedData {
     private final IRoleRepository roleRepository;
     private final IUserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
 
     //Цей метод буде Seed даних у БД
     //Цей метод в java Spring буде зпускати автоматично
     @PostConstruct
-    public void seed(){
+    public void seed() {
         System.out.println("---------Run seed data-----------");
 
-        try{
+        try {
             seedRoles();
             seedUsers();
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             System.out.println("Error during final stage of seeding");
         }
 
     }
-
-
 
     private void seedRoles() {
         List<String> roles = RolesConstants.Roles;
@@ -60,9 +52,7 @@ public class AppSeedData {
     }
 
     private void seedUsers() {
-        System.out.println("count - "+userRepository.count());
-//        userRepository.deleteAll();
-        if(userRepository.count() == 0) {
+        if (userRepository.count() == 0) {
             RoleEntity role = roleRepository.findByName(RolesConstants.AdminRole).orElseThrow();
             UserEntity user = new UserEntity();
             user.setUsername("admin@gmail.com");
@@ -72,10 +62,8 @@ public class AppSeedData {
             userRepository.save(user);
             System.out.println("User was created");
         }
+        else {
+            System.out.println("Users are already in the db");
+        }
     }
-
-
-
-
-
-    }
+}

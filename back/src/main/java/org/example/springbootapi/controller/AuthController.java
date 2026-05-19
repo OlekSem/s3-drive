@@ -1,4 +1,4 @@
-package org.example.springbootapi.controllers;
+package org.example.springbootapi.controller;
 
 
 import org.example.springbootapi.Models.Users.JwtResponse;
