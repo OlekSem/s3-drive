@@ -1,9 +1,9 @@
-package org.example.springbootapi.services;
+package org.example.springbootapi.service;
 
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import lombok.RequiredArgsConstructor;
-import org.example.springbootapi.properties.MinioProperties;
+import org.example.springbootapi.config.MinioProperties;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 

@@ -1,10 +1,8 @@
-package org.example.springbootapi.Models.Users;
+package org.example.springbootapi.dto.user;
 
 
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.UUID;
 
 @Getter
 @Setter

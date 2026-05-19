@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 
 import lombok.RequiredArgsConstructor;
-import org.example.springbootapi.services.MinioService;
+import org.example.springbootapi.service.MinioService;
 import org.springframework.http.MediaType;
 
 import org.springframework.http.ResponseEntity;
@@ -22,21 +22,13 @@ public class FileController {
 
     private final MinioService minioService;
     @Operation(
-
             summary = "Upload file to MinIO",
-
             requestBody = @RequestBody(
-
                     required = true,
-
                     content = @Content(
-
                             mediaType = MediaType.MULTIPART_FORM_DATA_VALUE
-
                     )
-
             )
-
     )
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

@@ -1,9 +1,9 @@
-package org.example.springbootapi.Data.Constants;
+package org.example.springbootapi.constant;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class RolesConstants {
+public class RoleConstants {
 
     public static final String AdminRole = "ROLE_ADMIN";
     public static final String UserRole = "ROLE_USER";

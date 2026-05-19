@@ -1,4 +1,4 @@
-package org.example.springbootapi.Models.Users;
+package org.example.springbootapi.dto.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

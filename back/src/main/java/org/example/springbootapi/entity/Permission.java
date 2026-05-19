@@ -1,34 +1,30 @@
-package org.example.springbootapi.Entities.files;
+package org.example.springbootapi.entity;
 
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.example.springbootapi.Entities.UserEntity;
-import org.example.springbootapi.types.PermissionType;
-
-import java.util.UUID;
+import org.example.springbootapi.constant.PermissionType;
 
 @Entity
-@Table(name = "file_permissions")
+@Table(name = "permissions")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class FilePermissionEntity {
+public class Permission {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "file_id", nullable = false)
-    private FileEntity file;
+    @JoinColumn(name = "node_id", nullable = false)
+    private Node node;
 
-    // Replaced private UUID userId;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private UserEntity user;
+    private User user;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

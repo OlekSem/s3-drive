@@ -1,4 +1,4 @@
-package org.example.springbootapi.services;
+package org.example.springbootapi.service;
 
 import lombok.RequiredArgsConstructor;
 import net.coobird.thumbnailator.Thumbnails;

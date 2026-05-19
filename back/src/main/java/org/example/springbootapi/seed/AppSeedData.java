@@ -1,12 +1,12 @@
-package org.example.springbootapi.Data.Seeding;
+package org.example.springbootapi.seed;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import org.example.springbootapi.Data.Constants.RolesConstants;
-import org.example.springbootapi.Entities.RoleEntity;
-import org.example.springbootapi.Entities.UserEntity;
-import org.example.springbootapi.repositories.IRoleRepository;
-import org.example.springbootapi.repositories.IUserRepository;
+import org.example.springbootapi.constant.RoleConstants;
+import org.example.springbootapi.entity.Role;
+import org.example.springbootapi.entity.User;
+import org.example.springbootapi.repository.RoleRepository;
+import org.example.springbootapi.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -16,8 +16,8 @@ import java.util.Set;
 @Component
 @RequiredArgsConstructor
 public class AppSeedData {
-    private final IRoleRepository roleRepository;
-    private final IUserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
     //Цей метод буде Seed даних у БД
@@ -36,12 +36,12 @@ public class AppSeedData {
     }
 
     private void seedRoles() {
-        List<String> roles = RolesConstants.Roles;
+        List<String> roles = RoleConstants.Roles;
 
         for (String roleName : roles) {
             boolean exists = roleRepository.findByName(roleName).isPresent();
             if (!exists) {
-                RoleEntity role = new RoleEntity();
+                Role role = new Role();
                 role.setName(roleName);
                 roleRepository.save(role);
                 System.out.println("Додано роль: " + roleName);
@@ -53,8 +53,8 @@ public class AppSeedData {
 
     private void seedUsers() {
         if (userRepository.count() == 0) {
-            RoleEntity role = roleRepository.findByName(RolesConstants.AdminRole).orElseThrow();
-            UserEntity user = new UserEntity();
+            Role role = roleRepository.findByName(RoleConstants.AdminRole).orElseThrow();
+            User user = new User();
             user.setUsername("admin@gmail.com");
             user.setEmail("admin@gmail.com");
             user.setPassword(passwordEncoder.encode("123456"));

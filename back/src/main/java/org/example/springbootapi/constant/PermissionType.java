@@ -1,11 +1,7 @@
-package org.example.springbootapi.types;
+package org.example.springbootapi.constant;
 
 public enum PermissionType {
-
     READ,
-
     WRITE,
-
     OWNER
-
 }

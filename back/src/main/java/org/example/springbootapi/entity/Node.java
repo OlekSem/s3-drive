@@ -1,21 +1,20 @@
-package org.example.springbootapi.Entities.files;
+package org.example.springbootapi.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.example.springbootapi.Entities.UserEntity;
-import org.example.springbootapi.types.FileType;
+import org.example.springbootapi.constant.NodeType;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "files")
+@Table(name = "nodes")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class FileEntity {
+public class Node {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,7 +25,7 @@ public class FileEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private FileType type; // FILE or FOLDER
+    private NodeType type; // FILE or FOLDER
 
     private Long size;
 
@@ -38,22 +37,22 @@ public class FileEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private UserEntity user;
+    private User user;
 
 
     // tree structure
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_id", nullable = true) // Nullable because root folders have no parent
-    private FileEntity parent;
+    @JoinColumn(name = "parent_id")
+    private Node parent;
 
 
-    @OneToMany(mappedBy = "file", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<FilePermissionEntity> permissions;
+    @OneToMany(mappedBy = "node", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Permission> permissions;
 
 
     //for content
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
-    private List<FileEntity> children;
+    private List<Node> children;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

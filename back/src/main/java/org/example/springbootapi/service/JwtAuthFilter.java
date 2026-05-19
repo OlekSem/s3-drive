@@ -1,4 +1,4 @@
-package org.example.springbootapi.services;
+package org.example.springbootapi.service;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

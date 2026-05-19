@@ -1,15 +1,14 @@
-package org.example.springbootapi.services;
+package org.example.springbootapi.service;
 
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.example.springbootapi.Data.Constants.RolesConstants;
-import org.example.springbootapi.Entities.RoleEntity;
-import org.example.springbootapi.Entities.UserEntity;
-import org.example.springbootapi.Models.Users.LoginDto;
-import org.example.springbootapi.Models.Users.RegisterDto;
-import org.example.springbootapi.repositories.IRoleRepository;
-import org.example.springbootapi.repositories.IUserRepository;
+import org.example.springbootapi.constant.RoleConstants;
+import org.example.springbootapi.entity.Role;
+import org.example.springbootapi.entity.User;
+import org.example.springbootapi.dto.user.LoginDto;
+import org.example.springbootapi.dto.user.RegisterDto;
+import org.example.springbootapi.repository.RoleRepository;
+import org.example.springbootapi.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -19,12 +18,12 @@ import java.io.IOException;
 @Service
 @RequiredArgsConstructor
 public class AccountService {
-    private final IUserRepository userRepository;
-    private final IRoleRepository roleRepository;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final SaveUserImageService saveUserImageService;
 
-    public UserEntity register(RegisterDto dto) {
+    public User register(RegisterDto dto) {
 
         if (userRepository.findByUsername(dto.getUsername()).isPresent()) {
             throw new RuntimeException("Username already exists");
@@ -38,7 +37,7 @@ public class AccountService {
             throw new RuntimeException("Passwords do not match");
         }
 
-        UserEntity user = new UserEntity();
+        User user = new User();
 
         user.setUsername(dto.getUsername());
         user.setEmail(dto.getEmail());
@@ -49,7 +48,7 @@ public class AccountService {
             user.setRoles(new java.util.HashSet<>());
         }
 
-        RoleEntity roleUser = roleRepository.findByName(RolesConstants.UserRole)
+        Role roleUser = roleRepository.findByName(RoleConstants.UserRole)
                 .orElseThrow(() -> new RuntimeException("User role not found"));
 
         user.getRoles().add(roleUser);
@@ -66,9 +65,9 @@ public class AccountService {
         return userRepository.save(user);
     }
 
-    public UserEntity login(LoginDto dto) {
+    public User login(LoginDto dto) {
 
-        UserEntity user = userRepository.findByEmail(dto.getEmail())
+        User user = userRepository.findByEmail(dto.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {

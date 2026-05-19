@@ -1,16 +1,14 @@
-package org.example.springbootapi.Entities;
+package org.example.springbootapi.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.UUID;
-
 @Entity
 @Getter
 @Setter
 @Table(name = "roles")
-public class RoleEntity {
+public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

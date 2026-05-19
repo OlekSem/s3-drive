@@ -3,8 +3,6 @@ package org.example.springbootapi.config;
 import io.minio.MinioClient;
 
 
-import org.example.springbootapi.properties.MinioProperties;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

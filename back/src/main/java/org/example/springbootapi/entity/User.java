@@ -1,10 +1,8 @@
-package org.example.springbootapi.Entities;
+package org.example.springbootapi.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.Data;
-import org.example.springbootapi.Entities.files.FileEntity;
-import org.example.springbootapi.Entities.files.FilePermissionEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,7 +13,7 @@ import java.util.stream.Collectors;
 @Entity
 @Table(name = "users")
 @Data
-public class UserEntity implements UserDetails {
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,14 +40,14 @@ public class UserEntity implements UserDetails {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
-    private Set<RoleEntity> roles = new HashSet<>();
+    private Set<Role> roles = new HashSet<>();
 
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<FileEntity> files;
+    private List<Node> nodes;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<FilePermissionEntity> permissions;
+    private List<Permission> permissions;
 
 
 

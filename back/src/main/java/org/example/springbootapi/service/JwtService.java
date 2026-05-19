@@ -1,9 +1,9 @@
-package org.example.springbootapi.services;
+package org.example.springbootapi.service;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import org.example.springbootapi.Entities.RoleEntity;
-import org.example.springbootapi.Entities.UserEntity;
+import org.example.springbootapi.entity.Role;
+import org.example.springbootapi.entity.User;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -20,7 +20,7 @@ public class JwtService {
         return Keys.hmacShaKeyFor(SECRET.getBytes());
     }
 
-    public String generateToken(UserEntity user) {
+    public String generateToken(User user) {
 
         Map<String, Object> claims = new HashMap<>();
 
@@ -31,7 +31,7 @@ public class JwtService {
                 "roles",
                 user.getRoles()
                         .stream()
-                        .map(RoleEntity::getName)
+                        .map(Role::getName)
                         .toList()
         );
 
