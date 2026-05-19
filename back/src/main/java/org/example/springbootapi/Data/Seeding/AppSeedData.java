@@ -32,8 +32,8 @@ public class AppSeedData {
         System.out.println("---------Run seed data-----------");
 
         try{
-            seedRoles();
-            seedUsers();
+//            seedRoles();
+//            seedUsers();
         }
         catch (Exception e){
             System.out.println("Error during final stage of seeding");
