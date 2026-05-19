@@ -15,22 +15,13 @@ import java.util.List;
 public class NodeResponseDto {
 
     private Long id;
-
     private String name;
-
     private NodeType type;
-
     private Long size;
-
     private String mimeType;
-
     private String storageKey;
-
     private Long userId;
-
     private Long parentId;
-
-    private List<Long> childrenIds;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

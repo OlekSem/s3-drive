@@ -14,27 +14,9 @@ import java.util.List;
 public interface NodeMapper {
 
     @Mapping(source = "user.id", target = "userId")
-
     @Mapping(source = "parent.id", target = "parentId")
 
-    @Mapping(target = "childrenIds", expression = "java(mapChildren(node))")
-
     NodeResponseDto toDto(Node node);
-
     List<NodeResponseDto> toDtoList(List<Node> nodes);
-
-    default List<Long> mapChildren(Node node) {
-
-        if (node.getChildren() == null) return List.of();
-
-        return node.getChildren()
-
-                .stream()
-
-                .map(Node::getId)
-
-                .toList();
-
-    }
 
 }
