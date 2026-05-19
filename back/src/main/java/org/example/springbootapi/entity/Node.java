@@ -23,6 +23,8 @@ public class Node {
     @Column(nullable = false)
     private String name;
 
+
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private NodeType type; // FILE or FOLDER
