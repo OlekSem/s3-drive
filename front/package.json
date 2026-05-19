@@ -1,0 +1,86 @@
+{
+  "name": "react-book-experience",
+  "version": "0.1.0",
+  "description": "A beautiful, mobile-first React book reading component with word-precise pagination, swipe navigation, and reading position persistence",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./styles.css": "./dist/style.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "build:lib": "vite build --mode lib",
+    "preview": "vite preview",
+    "prepublishOnly": "npm run build:lib"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/umuterturk/react-book-reader.git"
+  },
+  "keywords": [
+    "react",
+    "book",
+    "reader",
+    "ebook",
+    "pagination",
+    "mobile",
+    "swipe",
+    "reading",
+    "typescript"
+  ],
+  "author": "Umut Erturk",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/umuterturk/react-book-reader/issues"
+  },
+  "homepage": "https://umuterturk.github.io/react-book-reader/",
+  "peerDependencies": {
+    "react": ">=17.0.0",
+    "react-dom": ">=17.0.0"
+  },
+  "dependencies": {
+    "@reduxjs/toolkit": "^2.11.2",
+    "@tailwindcss/vite": "^4.3.0",
+    "axios": "^1.16.1",
+    "clsx": "^2.1.1",
+    "jwt-decode": "^4.0.0",
+    "object-to-formdata": "^4.5.1",
+    "react-book-experience": "^0.1.0",
+    "react-reader": "^2.0.15",
+    "react-redux": "^9.2.0",
+    "react-router-dom": "^7.15.1",
+    "react-swipeable": "^7.0.1",
+    "tailwind-merge": "^3.6.0",
+    "tailwindcss": "^4.3.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@vitejs/plugin-react": "^4.2.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "typescript": "^5.3.0",
+    "vite": "^5.0.0",
+    "vite-plugin-dts": "^3.9.1",
+    "vite-plugin-svgr": "^5.2.0"
+  }
+}
