@@ -3,13 +3,13 @@ package org.example.springbootapi.Entities;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.Data;
+import org.example.springbootapi.Entities.files.FileEntity;
+import org.example.springbootapi.Entities.files.FilePermissionEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Entity
@@ -44,17 +44,15 @@ public class UserEntity implements UserDetails {
     )
     private Set<RoleEntity> roles = new HashSet<>();
 
-    @ManyToMany
 
-    @JoinTable(
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FileEntity> files;
 
-            name = "user_books",
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FilePermissionEntity> permissions;
 
-            joinColumns = @JoinColumn(name = "user_id"),
 
-            inverseJoinColumns = @JoinColumn(name = "book_id")
 
-    )
 
 
     @Override
