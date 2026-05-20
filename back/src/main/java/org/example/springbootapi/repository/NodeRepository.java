@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface NodeRepository extends JpaRepository<Node, Long> {
     List<Node> findAllByUserId(Long id);
+    List<Node> findByUserIdAndParentIsNull(Long userId);
 }

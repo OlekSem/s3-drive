@@ -51,6 +51,8 @@ public class Node {
     @OneToMany(mappedBy = "node", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Permission> permissions;
 
+    private boolean isInTrash;
+
 
     //for content
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)

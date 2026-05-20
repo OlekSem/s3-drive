@@ -10,7 +10,9 @@ import lombok.RequiredArgsConstructor;
 import org.example.springbootapi.dto.node.NodeResponseDto;
 import org.example.springbootapi.entity.Node;
 import org.example.springbootapi.entity.User;
+import org.example.springbootapi.repository.NodeRepository;
 import org.example.springbootapi.service.FileService;
+import org.example.springbootapi.service.FolderService;
 import org.example.springbootapi.service.MinioService;
 import org.springframework.http.MediaType;
 
@@ -26,36 +28,34 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/files")
-public class FileController {
-
+@RequestMapping("/api/folder")
+public class FolderController {
     private final MinioService minioService;
     private final FileService fileService;
-    @Operation(
-            summary = "Upload file to MinIO",
-            requestBody = @RequestBody(
-                    required = true,
-                    content = @Content(
-                            mediaType = MediaType.MULTIPART_FORM_DATA_VALUE
-                    )
-            )
-    )
+    private final FolderService folderService;
+    private final NodeRepository nodeRepository;
 
 
-    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping("/create")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file,
-                                             @AuthenticationPrincipal User user,
-                                             @RequestParam(required = false) Long parentId)
-    {
-        Node node = fileService.upload(file, user, parentId);
-        return ResponseEntity.ok(node.getName() + " --- " + node.getStorageKey());
+    public ResponseEntity<String> createFolder(
+            @AuthenticationPrincipal User user,
+            @RequestParam(required = false) Long parentId
+    ) {
+        System.out.println("parent - " + parentId);
+
+        folderService.createFolder(user, parentId);
+
+        return ResponseEntity.ok("ok");
     }
 
-    @GetMapping()
+    @GetMapping("/view")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<NodeResponseDto>> GetAll(@AuthenticationPrincipal User user){
-        return ResponseEntity.ok(fileService.getAll(user));
-    }
+    public ResponseEntity<List<NodeResponseDto>> view(
+            @AuthenticationPrincipal User user,
+            @RequestParam(required = false) Long folderId
+    ) {
 
+        return ResponseEntity.ok(folderService.view(folderId, user));
+    }
 }
