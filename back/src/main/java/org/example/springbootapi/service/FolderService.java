@@ -1,11 +1,12 @@
 package org.example.springbootapi.service;
 
-
+import jakarta.persistence.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.example.springbootapi.constant.NodeType;
 import org.example.springbootapi.dto.node.NodeResponseDto;
 import org.example.springbootapi.entity.Node;
+import org.example.springbootapi.entity.Permission;
 import org.example.springbootapi.entity.User;
 import org.example.springbootapi.mapper.NodeMapper;
 import org.example.springbootapi.repository.NodeRepository;
@@ -21,18 +22,16 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class FileService {
+public class FolderService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final NodeRepository nodeRepository;
     private final MinioService minioService;
     private final NodeMapper nodeMapper;
+    private final String defaultName = "untitled folder";
 
     @Transactional
-
-    public Node upload(MultipartFile file, User user, Long parentId) {
-
-        String storageKey = minioService.uploadFile(file);
+    public Node createFolder(User user, Long parentId) {
 
         Node parent = null;
         if (parentId != null) {
@@ -40,24 +39,41 @@ public class FileService {
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "Parent not found"));
         }
 
-        Node node = Node.builder()
-                .storageKey(storageKey)
-                .name(file.getOriginalFilename())
-                .type(NodeType.FILE)
-                .size(file.getSize())
-                .mimeType(file.getContentType())
+        Node folder = Node.builder()
+                .name(defaultName)
+                .type(NodeType.FOLDER)
                 .user(user)
                 .parent(parent)
+                .isInTrash(false)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
-
-        return nodeRepository.save(node);
+        return nodeRepository.save(folder);
     }
 
-
     @Transactional
-    public List<NodeResponseDto> getAll(User user){
-        return nodeMapper.toDtoList(nodeRepository.findAllByUserId(user.getId()));
+    public List<NodeResponseDto> view(Long folderId, User user) {
+        if (folderId == null) {
+            List<Node> nodes = nodeRepository.findByUserIdAndParentIsNull(user.getId());
+            return nodeMapper.toDtoList(nodes);
+        }
+        Node folder = nodeRepository.findById(folderId)
+                .orElseThrow(() ->
+                        new ResponseStatusException(HttpStatus.FORBIDDEN, "Folder not found")
+                );
+
+        if (folder.getType() != NodeType.FOLDER)
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not a folder");
+
+        // SECURITY CHECK (important)
+//        if (!folder.getUser().getId().equals(user.getId())) {
+//            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No access");
+//        }
+
+        List<Node> children = folder.getChildren();
+        if (children == null) {
+            return List.of();
+        }
+        return nodeMapper.toDtoList(children);
     }
 }
