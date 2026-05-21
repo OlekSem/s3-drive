@@ -1,47 +1,18 @@
-import Header from "./components/Header.tsx";
-import {Outlet, Route, Routes} from "react-router-dom";
-import {useAppSelector} from "./store";
-import './main.css'
-import Register from "./pages/Users/Register.tsx";
-import LogIn from "./pages/Users/LogIn.tsx";
-import Home from "./pages/Home.tsx";
 
+import './App.css'
+// import {useTheme} from "./hooks/useTheme.ts";
+import {RouteLayout} from "./layout/RouteLayout.tsx";
 
-const MainLayout = () => {
-    return (
-        <div className="min-h-screen">
-            <Header />
+function App() {
+    // const { theme, toggleTheme } = useTheme();
 
-            <main>
-                <Outlet />
-            </main>
+  return (
+    <>
+        <div className="bg-[var(--bg)] w-full h-screen">
+            <RouteLayout />
         </div>
-    );
-};
-
-export default function App() {
-    const user =
-        useAppSelector(redux => redux.auth.user);
-
-    console.log("User roles", user?.roles);
-    return (
-        // <BrowserRouter>
-        <Routes>
-            <Route path={"/"} element={<MainLayout/>}>
-                <Route index element={<Home/>}/>
-
-                <Route path={"register"} element={<Register/>}/>
-                <Route path={"login"} element={<LogIn/>}/>
-
-            </Route>
-
-            {/* Auth Layout */}
-
-
-
-            {/* Fallback Route */}
-        </Routes>
-        // </BrowserRouter>
-
-    );
+    </>
+  )
 }
+
+export default App
