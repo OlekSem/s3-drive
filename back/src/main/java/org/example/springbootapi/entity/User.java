@@ -43,11 +43,11 @@ public class User implements UserDetails {
     private Set<Role> roles = new HashSet<>();
 
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Node> nodes;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Permission> permissions;
+    private List<PermissionNode> permissions = new ArrayList<>();
 
 
 

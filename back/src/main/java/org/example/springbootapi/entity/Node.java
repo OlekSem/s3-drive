@@ -5,6 +5,7 @@ import lombok.*;
 import org.example.springbootapi.constant.NodeType;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -38,8 +39,8 @@ public class Node {
 
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "owner_id", nullable = false)
+    private User owner;
 
 
     // tree structure
@@ -49,9 +50,15 @@ public class Node {
 
 
     @OneToMany(mappedBy = "node", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Permission> permissions;
+    private List<PermissionNode> permissions = new ArrayList<>();
 
-    private boolean isInTrash;
+
+    private boolean trash;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "original_parent_id")
+    private Node originalParent;
+
 
 
     //for content

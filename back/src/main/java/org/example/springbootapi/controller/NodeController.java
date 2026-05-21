@@ -12,6 +12,7 @@ import org.example.springbootapi.entity.Node;
 import org.example.springbootapi.entity.User;
 import org.example.springbootapi.service.FileService;
 import org.example.springbootapi.service.MinioService;
+import org.example.springbootapi.service.NodeService;
 import org.springframework.http.MediaType;
 
 import org.springframework.http.ResponseEntity;
@@ -26,32 +27,37 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/files")
-public class FileController {
-
+@RequestMapping("/api/nodes")
+public class NodeController {
     private final MinioService minioService;
     private final FileService fileService;
-    @Operation(
-            summary = "Upload file to MinIO",
-            requestBody = @RequestBody(
-                    required = true,
-                    content = @Content(
-                            mediaType = MediaType.MULTIPART_FORM_DATA_VALUE
-                    )
-            )
-    )
+    private final NodeService nodeService;
 
 
-    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+
+    @DeleteMapping("/SoftDelete")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file,
-                                             @AuthenticationPrincipal User user,
-                                             @RequestParam(required = false) Long parentId)
-    {
-        Node node = fileService.upload(file, user, parentId);
-        return ResponseEntity.ok(node.getName() + " --- " + node.getStorageKey());
+    public ResponseEntity<Void> softDelete(
+            @AuthenticationPrincipal User user,
+            @RequestParam Long nodeId
+    ) {
+        nodeService.softDelete(nodeId, user);
+        return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/trash")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<NodeResponseDto>> GetInTrash(@AuthenticationPrincipal User user, @RequestParam(required = false) Long folderId){
+        System.out.println(user.getUsername());
+        return ResponseEntity.ok(nodeService.getInTrash(folderId, user));
+    }
+
+    @DeleteMapping("/DeletePermanently")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> DeletePermanently(@AuthenticationPrincipal User user, @RequestParam(required = false) Long folderId){
+        nodeService.permanentDelete(folderId, user);
+        return ResponseEntity.noContent().build();
+    }
 
 
 }

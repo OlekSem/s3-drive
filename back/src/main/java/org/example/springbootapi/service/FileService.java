@@ -27,6 +27,7 @@ public class FileService {
     private final NodeRepository nodeRepository;
     private final MinioService minioService;
     private final NodeMapper nodeMapper;
+    private final NodeService nodeService;
 
     @Transactional
 
@@ -40,13 +41,22 @@ public class FileService {
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "Parent not found"));
         }
 
+        if(parent!=null){
+            if(nodeService.isInTrash(parent)){
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Parent folder is deleted"
+                );
+            }
+        }
+
         Node node = Node.builder()
                 .storageKey(storageKey)
                 .name(file.getOriginalFilename())
                 .type(NodeType.FILE)
                 .size(file.getSize())
                 .mimeType(file.getContentType())
-                .user(user)
+                .owner(user)
                 .parent(parent)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
@@ -56,8 +66,5 @@ public class FileService {
     }
 
 
-    @Transactional
-    public List<NodeResponseDto> getAll(User user){
-        return nodeMapper.toDtoList(nodeRepository.findAllByUserId(user.getId()));
-    }
+
 }
