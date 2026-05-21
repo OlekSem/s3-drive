@@ -4,9 +4,9 @@ import io.swagger.v3.oas.annotations.Operation;
 
 import io.swagger.v3.oas.annotations.media.Content;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
-
-import org.springframework.core.io.Resource;
+import org.springframework.web.bind.annotation.RequestBody;
+import jakarta.validation.Valid;
+import org.example.springbootapi.dto.node.RenameNodeRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.example.springbootapi.dto.node.NodeResponseDto;
 import org.example.springbootapi.entity.Node;
@@ -33,7 +33,7 @@ public class FileController {
     private final FileService fileService;
     @Operation(
             summary = "Upload file to MinIO",
-            requestBody = @RequestBody(
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     required = true,
                     content = @Content(
                             mediaType = MediaType.MULTIPART_FORM_DATA_VALUE
@@ -62,6 +62,17 @@ public class FileController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<NodeResponseDto>> GetAll(@AuthenticationPrincipal User user){
         return ResponseEntity.ok(fileService.getAll(user));
+    }
+
+
+    @PatchMapping("/rename/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<NodeResponseDto> renameNode(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User user,
+            @Valid @RequestBody RenameNodeRequestDto requestDto) {
+        NodeResponseDto updatedNode = fileService.renameNode(user, id, requestDto);
+        return ResponseEntity.ok(updatedNode);
     }
 
 }

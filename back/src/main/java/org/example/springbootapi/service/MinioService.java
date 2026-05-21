@@ -58,9 +58,11 @@ public class MinioService {
             throw new RuntimeException("Error uploading file to MinIO", e);
         }
     }
+
     public String getFileUrl(String fileName) {
         return properties.getEndpoint() + "/" + properties.getBucket() + "/" + fileName;
     }
+
     public void deleteFile(String fileName) {
         try {
             minioClient.removeObject(
@@ -73,6 +75,7 @@ public class MinioService {
             throw new RuntimeException("Error deleting file from MinIO", e);
         }
     }
+
     private String generateFileName(String originalName) {
         return UUID.randomUUID() + "_" + originalName;
     }

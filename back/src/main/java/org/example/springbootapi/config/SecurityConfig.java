@@ -1,5 +1,6 @@
 package org.example.springbootapi.config;
 
+import jakarta.servlet.DispatcherType;
 import lombok.RequiredArgsConstructor;
 import org.example.springbootapi.service.JwtAuthFilter;
 import org.springframework.context.annotation.Bean;
@@ -27,8 +28,9 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         //set endpoints you want to allow !!!!!!!!!!!!!!
-        config.setAllowedOrigins(List.of(""));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedOrigins(List.of("http://localhost:8080"));
+//        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        config.setAllowedMethods(List.of("*"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
 
@@ -46,6 +48,8 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
                 .authorizeHttpRequests(auth -> auth
+                        .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
+
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/files/**").permitAll()
                         .requestMatchers("/api/folder/**").permitAll()
@@ -58,11 +62,8 @@ public class SecurityConfig {
                 )
 
                 .addFilterBefore(jwtAuthFilter,
-
                         UsernamePasswordAuthenticationFilter.class
-
                 );
-
 
         return http.build();
     }

@@ -5,6 +5,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.example.springbootapi.constant.NodeType;
 import org.example.springbootapi.dto.node.NodeResponseDto;
+import org.example.springbootapi.dto.node.RenameNodeRequestDto;
 import org.example.springbootapi.entity.Node;
 import org.example.springbootapi.entity.User;
 import org.example.springbootapi.mapper.NodeMapper;
@@ -26,8 +27,6 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class FileService {
-    private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
     private final NodeRepository nodeRepository;
     private final MinioService minioService;
     private final NodeMapper nodeMapper;
@@ -80,5 +79,30 @@ public class FileService {
                 .build();
 
 
+    }
+
+    @Transactional
+    public NodeResponseDto renameNode(User user, Long nodeId, RenameNodeRequestDto requestDto){
+        Node node = nodeRepository.findById(nodeId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item not found"));
+
+        if (!Objects.equals(node.getUser().getId(), user.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not own this item");
+        }
+
+        // 3. Optional: Validate name uniqueness within the same parent folder
+        boolean nameExists = nodeRepository.existsByParentAndNameAndUser(
+                node.getParent(),
+                requestDto.getNewName(),
+                user
+        );
+
+        if(nameExists) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "An item with this name already exists in this folder");
+        }
+
+        node.setName(requestDto.getNewName());
+        Node updatedNode = nodeRepository.save(node);
+        return nodeMapper.toDto(updatedNode);
     }
 }
