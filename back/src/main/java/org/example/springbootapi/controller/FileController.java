@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 
+import org.springframework.core.io.Resource;
 import lombok.RequiredArgsConstructor;
 import org.example.springbootapi.dto.node.NodeResponseDto;
 import org.example.springbootapi.entity.Node;
@@ -16,7 +17,6 @@ import org.springframework.http.MediaType;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -50,6 +50,12 @@ public class FileController {
     {
         Node node = fileService.upload(file, user, parentId);
         return ResponseEntity.ok(node.getName() + " --- " + node.getStorageKey());
+    }
+
+    @GetMapping("/download/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> getResource(@PathVariable Long id, @AuthenticationPrincipal User user) {
+        return fileService.downloadFile(user, id);
     }
 
     @GetMapping()
