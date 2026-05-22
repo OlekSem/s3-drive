@@ -4,6 +4,7 @@ import UniversalForm from "./UniversalForm";
 import FormikInput from "./FormikInput";
 import FormikFileInput from "./FormikFileInput";
 // import {authService} from "../service/AuthService.ts";
+import {authService} from "../service/AuthService.ts";
 import type IRegisterModel from "../models/IRegisterModel.ts";
 import {authService} from "../service/AuthService.ts";
 import {useAppDispatch} from "../hooks/redux.ts";
@@ -40,7 +41,6 @@ interface ModalWindowProps {
     isOpen: boolean;
     closeModal: () => void;
 }
-
 const RegisterModalWindow: FC<ModalWindowProps> = ({ isOpen, closeModal }) => {
     const [register] = authService.useRegisterMutation();
     const [login] = authService.useLoginMutation()
@@ -53,8 +53,7 @@ const RegisterModalWindow: FC<ModalWindowProps> = ({ isOpen, closeModal }) => {
         dispatch(loginSuccess(result.token));
         localStorage.setItem('token', result.token);
 
-        closeModal();
-    };
+    }
 
     return (
         <div className="
