@@ -3,6 +3,7 @@ import {fetchBaseQuery} from "@reduxjs/toolkit/query";
 import API_ENV from "../env";
 import {serialize} from "object-to-formdata";
 import type IRegisterModel from "../models/IRegisterModel.ts";
+import type ILoginModel from "../models/ILoginModel.ts";
 
 
 export const authService = createApi({
@@ -23,6 +24,16 @@ export const authService = createApi({
             },
             invalidatesTags: ["Auth"]
         }),
+        login: build.mutation<{token : string}, ILoginModel>({
+            query: (model)=>{
+                const formData = serialize(model)
+                return{
+                    url: "/login",
+                    method: "POST",
+                    body: formData,
+                }
+            }
+        })
 
     })
 })

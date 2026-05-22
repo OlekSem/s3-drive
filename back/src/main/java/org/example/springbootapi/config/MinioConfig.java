@@ -13,9 +13,7 @@ public class MinioConfig {
     private final MinioProperties props;
 
     public MinioConfig(MinioProperties props) {
-
         this.props = props;
-
     }
 
 
