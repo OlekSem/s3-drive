@@ -6,6 +6,10 @@ import FormikFileInput from "./FormikFileInput";
 // import {authService} from "../service/AuthService.ts";
 import {authService} from "../service/AuthService.ts";
 import type IRegisterModel from "../models/IRegisterModel.ts";
+import {authService} from "../service/AuthService.ts";
+import {useAppDispatch} from "../hooks/redux.ts";
+import {loginSuccess} from "../store/reducers/AuthSlice.ts";
+import type ILoginModel from "../models/ILoginModel.ts";
 
 // interface RegisterValues {
 //     username: string;
@@ -37,21 +41,19 @@ interface ModalWindowProps {
     isOpen: boolean;
     closeModal: () => void;
 }
-
 const RegisterModalWindow: FC<ModalWindowProps> = ({ isOpen, closeModal }) => {
-    // const [register] = authService.useRegisterMutation();
-    if (!isOpen) return null;
-    const handleSubmit = (values: IRegisterModel) => {
-        console.log(values)
-        // const token = register(values)
-        // console.log(token);
     const [register] = authService.useRegisterMutation();
+    const [login] = authService.useLoginMutation()
+    const dispatch = useAppDispatch();
     if (!isOpen) return null;
-    const handleSubmit = (values: IRegisterModel) => {
-        const token = register(values)
-        console.log(token);
-        closeModal();
-    };
+    const handleSubmit = async (values: IRegisterModel) => {
+        const { email } = await register(values).unwrap();
+        const model: ILoginModel = { email, password: values.password };
+        const result = await login(model).unwrap();
+        dispatch(loginSuccess(result.token));
+        localStorage.setItem('token', result.token);
+
+    }
 
     return (
         <div className="

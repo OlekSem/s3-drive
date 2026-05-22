@@ -1,8 +1,10 @@
 import {combineReducers, configureStore} from "@reduxjs/toolkit";
-
+import {authService} from "../service/AuthService.ts";
+import authReducer from "../store/reducers/AuthSlice.ts";
 
 const rootReducer = combineReducers({
-
+    [authService.reducerPath]: authService.reducer,
+    authReducer,
 })
 
 export const setupStore = () => {
@@ -10,7 +12,7 @@ export const setupStore = () => {
         reducer: rootReducer,
         middleware: (getDefaultMiddleware) =>
             getDefaultMiddleware().concat(
-
+                authService.middleware,
             ),
     })
 }
