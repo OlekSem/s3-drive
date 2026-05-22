@@ -3,21 +3,13 @@ import type { FC } from "react";
 import UniversalForm from "./UniversalForm";
 import FormikInput from "./FormikInput";
 import FormikFileInput from "./FormikFileInput";
-// import {authService} from "../service/AuthService.ts";
-import {authService} from "../service/AuthService.ts";
+
 import type IRegisterModel from "../models/IRegisterModel.ts";
 import {authService} from "../service/AuthService.ts";
 import {useAppDispatch} from "../hooks/redux.ts";
 import {loginSuccess} from "../store/reducers/AuthSlice.ts";
 import type ILoginModel from "../models/ILoginModel.ts";
 
-// interface RegisterValues {
-//     username: string;
-//     email: string;
-//     password: string;
-//     confirmPassword: string;
-//     avatar: File | null;
-// }
 type RegisterTextValues = Omit<IRegisterModel, "avatar">;
 const initialValues: IRegisterModel = {
     username: "",
@@ -41,6 +33,7 @@ interface ModalWindowProps {
     isOpen: boolean;
     closeModal: () => void;
 }
+
 const RegisterModalWindow: FC<ModalWindowProps> = ({ isOpen, closeModal }) => {
     const [register] = authService.useRegisterMutation();
     const [login] = authService.useLoginMutation()
@@ -53,7 +46,8 @@ const RegisterModalWindow: FC<ModalWindowProps> = ({ isOpen, closeModal }) => {
         dispatch(loginSuccess(result.token));
         localStorage.setItem('token', result.token);
 
-    }
+        closeModal();
+    };
 
     return (
         <div className="
