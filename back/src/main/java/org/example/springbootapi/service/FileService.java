@@ -99,7 +99,7 @@ public class FileService {
         if (!permissionService.canRead(user, node)) {
             throw new ResponseStatusException(
                     HttpStatus.FORBIDDEN,
-                    "Only the owner can permanently delete items"
+                    "You don't have enough rights to rename this item"
             );
         }
 
