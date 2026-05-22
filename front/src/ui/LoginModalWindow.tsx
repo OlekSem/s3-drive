@@ -2,17 +2,14 @@ import * as Yup from "yup";
 import type {FC} from "react";
 import UniversalForm from "./UniversalForm.tsx";
 import FormikInput from "./FormikInput.tsx";
+import type ILoginModel from "../models/ILoginModel.ts";
+import {authService} from "../service/AuthService.ts";
 
 
 
-interface LoginValues {
 
-    email: string;
-    password: string;
-
-}
-type LoginTextValues = Omit<LoginValues, "avatar">;
-const initialValues: LoginValues = {
+type LoginTextValues = Omit<ILoginModel, "avatar">;
+const initialValues: ILoginModel = {
     email: "",
     password: "",
 };
@@ -26,10 +23,14 @@ interface ModalWindowProps {
 }
 
 const LoginModalWindow : FC<ModalWindowProps> = ({ isOpen, closeModal }) => {
+    const [login] = authService.useLoginMutation();
     if (!isOpen) return null;
 
-    const handleSubmit = (values: LoginValues) => {
+    const handleSubmit = (values: ILoginModel) => {
+
         console.log(values);
+        const token = login(values);
+        console.log(token)
         closeModal();
     };
     return (

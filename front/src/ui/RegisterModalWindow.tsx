@@ -3,7 +3,7 @@ import type { FC } from "react";
 import UniversalForm from "./UniversalForm";
 import FormikInput from "./FormikInput";
 import FormikFileInput from "./FormikFileInput";
-import {authService} from "../service/AuthService.ts";
+// import {authService} from "../service/AuthService.ts";
 import type IRegisterModel from "../models/IRegisterModel.ts";
 
 // interface RegisterValues {
@@ -38,11 +38,12 @@ interface ModalWindowProps {
 }
 
 const RegisterModalWindow: FC<ModalWindowProps> = ({ isOpen, closeModal }) => {
-    const [register] = authService.useRegisterMutation();
+    // const [register] = authService.useRegisterMutation();
     if (!isOpen) return null;
     const handleSubmit = (values: IRegisterModel) => {
-        const token = register(values)
-        console.log(token);
+        console.log(values)
+        // const token = register(values)
+        // console.log(token);
         closeModal();
     };
 
