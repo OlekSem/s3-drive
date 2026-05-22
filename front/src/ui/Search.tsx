@@ -9,7 +9,7 @@ const Search = () => {
                   outline-none focus:outline-none
                    text-[var(--placeholder)]
             "
-                placeholder="Пошук..."/>
+                placeholder="Search..."/>
         </div>
     );
 };

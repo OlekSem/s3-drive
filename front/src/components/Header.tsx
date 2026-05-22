@@ -1,7 +1,7 @@
-import Search from "../ui/search.tsx";
-import UploadButton from "../ui/uploadButton.tsx";
-import Avatar from "../ui/avatar.tsx";
-import ThemeSwitch from "../ui/themeSwitch.tsx";
+import Search from "../ui/Search.tsx";
+import UploadButton from "../ui/UploadButton.tsx";
+import Avatar from "../ui/Avatar.tsx";
+import ThemeSwitch from "../ui/ThemeSwitch.tsx";
 
 
 const Header = () => {
