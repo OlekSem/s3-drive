@@ -23,7 +23,6 @@ interface ModalWindowProps {
     isOpen: boolean;
     closeModal: () => void;
 }
-
 const LoginModalWindow : FC<ModalWindowProps> = ({ isOpen, closeModal }) => {
     const [login] = authService.useLoginMutation();
     const dispatch = useAppDispatch();
@@ -37,7 +36,7 @@ const LoginModalWindow : FC<ModalWindowProps> = ({ isOpen, closeModal }) => {
             localStorage.setItem("token", result.token);
         }
         closeModal();
-    };
+    }
     return (
         <div className="
       fixed inset-0 z-50
