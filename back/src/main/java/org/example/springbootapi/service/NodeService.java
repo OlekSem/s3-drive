@@ -67,7 +67,7 @@ public class NodeService {
 
 
         node.setTrash(true);
-        
+
         nodeRepository.save(node);
 
     }
