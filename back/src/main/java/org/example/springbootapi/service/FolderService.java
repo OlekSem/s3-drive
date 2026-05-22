@@ -19,14 +19,12 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
 public class FolderService {
-    private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
     private final NodeRepository nodeRepository;
-    private final MinioService minioService;
     private final NodeMapper nodeMapper;
     private final String defaultName = "untitled folder";
 
@@ -37,6 +35,15 @@ public class FolderService {
         if (parentId != null) {
             parent = nodeRepository.findById(parentId)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "Parent not found"));
+        }
+        boolean nameExists = nodeRepository.existsByParentAndNameAndUser(
+                parent,
+                defaultName,
+                user
+        );
+
+        if(nameExists) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "An item with this name already exists in this folder");
         }
 
         Node folder = Node.builder()
@@ -64,11 +71,6 @@ public class FolderService {
 
         if (folder.getType() != NodeType.FOLDER)
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not a folder");
-
-        // SECURITY CHECK (important)
-//        if (!folder.getUser().getId().equals(user.getId())) {
-//            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No access");
-//        }
 
         List<Node> children = folder.getChildren();
         if (children == null) {
