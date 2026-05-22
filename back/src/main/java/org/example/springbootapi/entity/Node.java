@@ -54,8 +54,8 @@ public class Node {
     @OneToMany(mappedBy = "node", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PermissionNode> permissions = new ArrayList<>();
 
-
-    private boolean trash;
+    @Column(nullable = false)
+    private boolean trash=false;
 
 //    @ManyToOne(fetch = FetchType.LAZY)
 //    @JoinColumn(name = "original_parent_id")

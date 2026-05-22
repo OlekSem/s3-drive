@@ -4,6 +4,7 @@ import UniversalForm from "./UniversalForm";
 import FormikInput from "./FormikInput";
 import FormikFileInput from "./FormikFileInput";
 // import {authService} from "../service/AuthService.ts";
+import {authService} from "../service/AuthService.ts";
 import type IRegisterModel from "../models/IRegisterModel.ts";
 
 // interface RegisterValues {
@@ -44,6 +45,11 @@ const RegisterModalWindow: FC<ModalWindowProps> = ({ isOpen, closeModal }) => {
         console.log(values)
         // const token = register(values)
         // console.log(token);
+    const [register] = authService.useRegisterMutation();
+    if (!isOpen) return null;
+    const handleSubmit = (values: IRegisterModel) => {
+        const token = register(values)
+        console.log(token);
         closeModal();
     };
 

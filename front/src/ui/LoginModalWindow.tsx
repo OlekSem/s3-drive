@@ -10,6 +10,17 @@ import {authService} from "../service/AuthService.ts";
 
 type LoginTextValues = Omit<ILoginModel, "avatar">;
 const initialValues: ILoginModel = {
+
+
+
+interface LoginValues {
+
+    email: string;
+    password: string;
+
+}
+type LoginTextValues = Omit<LoginValues, "avatar">;
+const initialValues: LoginValues = {
     email: "",
     password: "",
 };
@@ -31,6 +42,10 @@ const LoginModalWindow : FC<ModalWindowProps> = ({ isOpen, closeModal }) => {
         console.log(values);
         const token = login(values);
         console.log(token)
+    if (!isOpen) return null;
+
+    const handleSubmit = (values: LoginValues) => {
+        console.log(values);
         closeModal();
     };
     return (
