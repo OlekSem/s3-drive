@@ -12,7 +12,7 @@ const UploadButton = () => {
             
             `}
             >
-                Завантажити</button>
+                Upload</button>
         </div>
     );
 };

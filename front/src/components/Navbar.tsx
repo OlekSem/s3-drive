@@ -1,4 +1,4 @@
-import Logo from "../ui/logo.tsx";
+import Logo from "../ui/Logo.tsx";
 
 
 
