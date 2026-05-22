@@ -7,7 +7,16 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface NodeRepository extends JpaRepository<Node, Long> {
-    List<Node> findAllByUserId(Long id);
-    List<Node> findByUserIdAndParentIsNull(Long userId);
-    boolean existsByParentAndNameAndUser(Node parent, String name, User user);
+    List<Node> findAllByOwnerId(Long id);
+    List<Node> findByOwnerIdAndParentIsNull(Long userId);
+    boolean existsByParentAndNameAndOwner(Node parent, String name, User user);
+
+    List<Node>  findByOwnerIdAndParentIsNullAndTrashIsFalse(Long userId);
+
+    List<Node> findByTrashTrueAndOwnerId(Long userId);
+
+    List<Node> findByParentIdAndTrashFalseAndOwnerId(
+                    Long folderId,
+                    Long userId
+            );
 }
