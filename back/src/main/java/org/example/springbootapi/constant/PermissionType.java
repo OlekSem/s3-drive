@@ -3,5 +3,5 @@ package org.example.springbootapi.constant;
 public enum PermissionType {
     READ,
     WRITE,
-    OWNER
+    DELETE
 }

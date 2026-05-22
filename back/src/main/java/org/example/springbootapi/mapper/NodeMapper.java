@@ -13,7 +13,7 @@ import java.util.List;
 @Component
 public interface NodeMapper {
 
-    @Mapping(source = "user.id", target = "userId")
+    @Mapping(source = "owner.id", target = "ownerId")
     @Mapping(source = "parent.id", target = "parentId")
 
     NodeResponseDto toDto(Node node);
