@@ -57,8 +57,6 @@ public class NodeService {
         }
 
         node.setTrash(true);
-        node.setOriginalParent(node.getParent());
-        node.setParent(null);
 
     }
 

@@ -55,9 +55,9 @@ public class Node {
 
     private boolean trash;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "original_parent_id")
-    private Node originalParent;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "original_parent_id")
+//    private Node originalParent;
 
 
 
