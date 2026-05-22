@@ -52,27 +52,6 @@ public class FileController {
         return ResponseEntity.ok(node.getName() + " --- " + node.getStorageKey());
     }
 
-    @GetMapping("/download/{id}")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Void> getResource(@PathVariable Long id, @AuthenticationPrincipal User user) {
-        return fileService.downloadFile(user, id);
-    }
 
-    @GetMapping()
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<NodeResponseDto>> GetAll(@AuthenticationPrincipal User user){
-        return ResponseEntity.ok(fileService.getAll(user));
-    }
-
-
-    @PatchMapping("/rename/{id}")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<NodeResponseDto> renameNode(
-            @PathVariable Long id,
-            @AuthenticationPrincipal User user,
-            @Valid @RequestBody RenameNodeRequestDto requestDto) {
-        NodeResponseDto updatedNode = fileService.renameNode(user, id, requestDto);
-        return ResponseEntity.ok(updatedNode);
-    }
 
 }
