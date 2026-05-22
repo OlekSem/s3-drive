@@ -4,6 +4,8 @@ import UniversalForm from "./UniversalForm.tsx";
 import FormikInput from "./FormikInput.tsx";
 import type ILoginModel from "../models/ILoginModel.ts";
 import {authService} from "../service/AuthService.ts";
+import {useAppDispatch} from "../hooks/redux.ts";
+import {loginSuccess} from "../store/reducers/AuthSlice.ts";
 
 
 
@@ -24,13 +26,16 @@ interface ModalWindowProps {
 
 const LoginModalWindow : FC<ModalWindowProps> = ({ isOpen, closeModal }) => {
     const [login] = authService.useLoginMutation();
+    const dispatch = useAppDispatch();
     if (!isOpen) return null;
 
-    const handleSubmit = (values: ILoginModel) => {
+    const handleSubmit = async (values: ILoginModel) => {
 
-        console.log(values);
-        const token = login(values);
-        console.log(token)
+        const result = await login(values).unwrap();
+        dispatch(loginSuccess(result.token));
+        if(result.token ){
+            localStorage.setItem("token", result.token);
+        }
         closeModal();
     };
     return (
