@@ -60,11 +60,7 @@ public class NodeController {
     }
 
 
-    @GetMapping("/download/{id}")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Void> getResource(@PathVariable Long id, @AuthenticationPrincipal User user) {
-        return fileService.downloadFile(user, id);
-    }
+
 
 
     @PatchMapping("/rename/{id}")

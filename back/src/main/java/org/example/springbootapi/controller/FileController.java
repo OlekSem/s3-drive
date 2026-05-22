@@ -52,6 +52,12 @@ public class FileController {
         return ResponseEntity.ok(node.getName() + " --- " + node.getStorageKey());
     }
 
+    @GetMapping("/download/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> getResource(@PathVariable Long id, @AuthenticationPrincipal User user) {
+        return fileService.downloadFile(user, id);
+    }
+
 
 
 }

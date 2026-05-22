@@ -79,7 +79,7 @@ public class FileService {
         if (!permissionService.canRead(user, node)) {
             throw new ResponseStatusException(
                     HttpStatus.FORBIDDEN,
-                    "Only the owner can permanently delete items"
+                    "You have insufficient rights to download this file"
             );
         }
         String presignedUrl = minioService.generateDownloadUrl(node.getStorageKey(), node.getName());
