@@ -35,8 +35,8 @@ public class FolderService {
             parent = nodeRepository.findById(parentId)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "Parent not found"));
         }
-        if(parent!=null){
-            if(nodeService.isInTrash(parent)){
+        if (parent != null) {
+            if (nodeService.isInTrash(parent)) {
                 throw new ResponseStatusException(
                         HttpStatus.BAD_REQUEST,
                         "Parent folder is deleted"
@@ -44,13 +44,13 @@ public class FolderService {
             }
         }
 
-        boolean nameExists = nodeRepository.existsByParentAndNameAndUser(
+        boolean nameExists = nodeRepository.existsByParentAndNameAndOwner(
                 parent,
                 defaultName,
                 user
         );
 
-        if(nameExists) {
+        if (nameExists) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "An item with this name already exists in this folder");
         }
 
@@ -88,11 +88,12 @@ public class FolderService {
         }
 
 
-        if(nodeService.isInTrash(folder)){
+        if (nodeService.isInTrash(folder)) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "This item is deleted"
             );
+        }
 
 
         List<Node> children = folder.getChildren()
@@ -101,5 +102,11 @@ public class FolderService {
                 .toList();
 
         return nodeMapper.toDtoList(children);
+
     }
+
+
+
+
+
 }

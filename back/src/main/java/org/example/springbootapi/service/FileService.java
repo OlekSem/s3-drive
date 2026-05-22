@@ -31,6 +31,7 @@ public class FileService {
     private final MinioService minioService;
     private final NodeMapper nodeMapper;
     private final NodeService nodeService;
+    private final PermissionService permissionService;
 
     @Transactional
     public Node upload(MultipartFile file, User user, Long parentId) {
@@ -74,8 +75,12 @@ public class FileService {
         if (node.getType() == NodeType.FOLDER) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot download a folder");
         }
-        if (!Objects.equals(node.getUser().getId(), user.getId())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not the owner of this file");
+
+        if (!permissionService.canRead(user, node)) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Only the owner can permanently delete items"
+            );
         }
         String presignedUrl = minioService.generateDownloadUrl(node.getStorageKey(), node.getName());
 
@@ -91,12 +96,15 @@ public class FileService {
         Node node = nodeRepository.findById(nodeId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item not found"));
 
-        if (!Objects.equals(node.getUser().getId(), user.getId())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not own this item");
+        if (!permissionService.canRead(user, node)) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Only the owner can permanently delete items"
+            );
         }
 
         // 3. Optional: Validate name uniqueness within the same parent folder
-        boolean nameExists = nodeRepository.existsByParentAndNameAndUser(
+        boolean nameExists = nodeRepository.existsByParentAndNameAndOwner(
                 node.getParent(),
                 requestDto.getNewName(),
                 user

@@ -4,10 +4,10 @@ import io.swagger.v3.oas.annotations.Operation;
 
 import io.swagger.v3.oas.annotations.media.Content;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
-
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.springbootapi.dto.node.NodeResponseDto;
+import org.example.springbootapi.dto.node.RenameNodeRequestDto;
 import org.example.springbootapi.entity.Node;
 import org.example.springbootapi.entity.User;
 import org.example.springbootapi.service.FileService;
@@ -57,6 +57,24 @@ public class NodeController {
     public ResponseEntity<Void> DeletePermanently(@AuthenticationPrincipal User user, @RequestParam(required = false) Long folderId){
         nodeService.permanentDelete(folderId, user);
         return ResponseEntity.noContent().build();
+    }
+
+
+    @GetMapping("/download/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> getResource(@PathVariable Long id, @AuthenticationPrincipal User user) {
+        return fileService.downloadFile(user, id);
+    }
+
+
+    @PatchMapping("/rename/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<NodeResponseDto> renameNode(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User user,
+            @Valid @RequestBody RenameNodeRequestDto requestDto) {
+        NodeResponseDto updatedNode = fileService.renameNode(user, id, requestDto);
+        return ResponseEntity.ok(updatedNode);
     }
 
 

@@ -56,7 +56,19 @@ public class NodeService {
             );
         }
 
+
+        Node parent = node.getParent();
+        if (parent != null) {
+            if (parent.getChildren() != null) {
+                parent.getChildren().removeIf(child -> child.getId().equals(node.getId()));
+            }
+            node.setParent(null);
+        }
+
+
         node.setTrash(true);
+        
+        nodeRepository.save(node);
 
     }
 
@@ -99,6 +111,8 @@ public class NodeService {
         if (node.getType() == NodeType.FOLDER && node.getChildren() != null) {
             List<Node> children = List.copyOf(node.getChildren());
             for (Node child : children) {
+                System.out.println(child.getName() + " is deleted");
+                if (child.isTrash()) continue;
                 deleteNodeRecursive(child);
             }
         }
