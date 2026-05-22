@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import org.example.springbootapi.constant.NodeType;
 
 import java.time.LocalDateTime;
-import java.util.List;
 @Data
 @Builder
 @AllArgsConstructor

@@ -5,32 +5,34 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.example.springbootapi.constant.NodeType;
 import org.example.springbootapi.dto.node.NodeResponseDto;
+import org.example.springbootapi.dto.node.RenameNodeRequestDto;
 import org.example.springbootapi.entity.Node;
 import org.example.springbootapi.entity.User;
 import org.example.springbootapi.mapper.NodeMapper;
 import org.example.springbootapi.repository.NodeRepository;
 import org.example.springbootapi.repository.RoleRepository;
 import org.example.springbootapi.repository.UserRepository;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
 public class FileService {
-    private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
     private final NodeRepository nodeRepository;
     private final MinioService minioService;
     private final NodeMapper nodeMapper;
     private final NodeService nodeService;
 
     @Transactional
-
     public Node upload(MultipartFile file, User user, Long parentId) {
 
         String storageKey = minioService.uploadFile(file);
@@ -66,5 +68,46 @@ public class FileService {
     }
 
 
+    public ResponseEntity<Void> downloadFile(User user, Long id) {
 
+        Node node = nodeRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "File not found"));
+        if (node.getType() == NodeType.FOLDER) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot download a folder");
+        }
+        if (!Objects.equals(node.getUser().getId(), user.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not the owner of this file");
+        }
+        String presignedUrl = minioService.generateDownloadUrl(node.getStorageKey(), node.getName());
+
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(URI.create(presignedUrl))
+                .build();
+
+
+    }
+
+    @Transactional
+    public NodeResponseDto renameNode(User user, Long nodeId, RenameNodeRequestDto requestDto){
+        Node node = nodeRepository.findById(nodeId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item not found"));
+
+        if (!Objects.equals(node.getUser().getId(), user.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not own this item");
+        }
+
+        // 3. Optional: Validate name uniqueness within the same parent folder
+        boolean nameExists = nodeRepository.existsByParentAndNameAndUser(
+                node.getParent(),
+                requestDto.getNewName(),
+                user
+        );
+
+        if(nameExists) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "An item with this name already exists in this folder");
+        }
+
+        node.setName(requestDto.getNewName());
+        Node updatedNode = nodeRepository.save(node);
+        return nodeMapper.toDto(updatedNode);
+    }
 }

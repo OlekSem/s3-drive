@@ -16,14 +16,12 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
 public class FolderService {
-    private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
     private final NodeRepository nodeRepository;
-    private final MinioService minioService;
     private final NodeMapper nodeMapper;
     private final PermissionService permissionService;
     private final NodeService nodeService;
@@ -46,6 +44,15 @@ public class FolderService {
             }
         }
 
+        boolean nameExists = nodeRepository.existsByParentAndNameAndUser(
+                parent,
+                defaultName,
+                user
+        );
+
+        if(nameExists) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "An item with this name already exists in this folder");
+        }
 
         Node folder = Node.builder()
                 .name(defaultName)
@@ -86,7 +93,6 @@ public class FolderService {
                     HttpStatus.BAD_REQUEST,
                     "This item is deleted"
             );
-        }
 
 
         List<Node> children = folder.getChildren()

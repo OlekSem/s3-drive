@@ -3,6 +3,8 @@ package org.example.springbootapi.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.example.springbootapi.constant.NodeType;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -65,7 +67,10 @@ public class Node {
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
     private List<Node> children;
 
+    @CreationTimestamp
     private LocalDateTime createdAt;
+
+    @UpdateTimestamp
     private LocalDateTime updatedAt;
 
     private LocalDateTime deletedAt;
