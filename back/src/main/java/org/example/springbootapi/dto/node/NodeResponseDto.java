@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import org.example.springbootapi.constant.NodeType;
 
 import java.time.LocalDateTime;
-import java.util.List;
 @Data
 @Builder
 @AllArgsConstructor
@@ -20,7 +19,7 @@ public class NodeResponseDto {
     private Long size;
     private String mimeType;
     private String storageKey;
-    private Long userId;
+    private Long ownerId;
     private Long parentId;
 
     private LocalDateTime createdAt;

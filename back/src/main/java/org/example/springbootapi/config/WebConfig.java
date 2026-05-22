@@ -1,6 +1,5 @@
 package org.example.springbootapi.config;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -10,14 +9,6 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Serve /uploads/** URLs from the filesystem "uploads" folder
-//        registry.addResourceHandler("/"+uploadDir+"/**")
-//                .addResourceLocations("file:"+uploadDir+"/");
-
-
-
-
-
         registry.addResourceHandler("/small/**")
                 .addResourceLocations("file:uploads/small/");
 

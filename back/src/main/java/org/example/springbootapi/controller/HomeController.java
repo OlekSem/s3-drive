@@ -10,9 +10,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api")
 @RequiredArgsConstructor
 
-
 public class HomeController {
-
 
     @GetMapping("/error-test")
     public ResponseEntity<String> errorTest() {
