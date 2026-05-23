@@ -45,9 +45,8 @@ export default function Trash() {
         }
     };
 
-    const handleRestoreNode = async (nodeIds: number[]) => {
-        // Handle bulk restoration similarly when ready
-    };
+
+
 
     return (
         <div className="p-8">
@@ -68,6 +67,7 @@ export default function Trash() {
             <Finder
                 nodes={trashFiles}
                 isLoading={isLoading}
+                // @ts-ignore
                 error={error}
                 mode="trash"
                 // Pass down your selection state handlers if Finder needs them:
@@ -75,7 +75,6 @@ export default function Trash() {
                 onSelectionChange={setSelectedIds}
                 // Update handlers to work with arrays seamlessly
                 onDeletePermanently={handleDeletePermanently}
-                onRestoreNode={handleRestoreNode}
             />
         </div>
     );

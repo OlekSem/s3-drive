@@ -51,6 +51,7 @@ export default function Folder(){
         }
     };
 
+
     return (
         <div className="p-8">
             <h1 className="text-2xl font-bold mb-4">Storage Explorer</h1>
@@ -59,6 +60,7 @@ export default function Folder(){
             <Finder
                 nodes={files}
                 isLoading={isLoading}
+                // @ts-ignore
                 error={error}
                 rootFolderName="Cloud Space"
                 onCreateFolder={handleCreateFolder}

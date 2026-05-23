@@ -1,5 +1,5 @@
 import Logo from "../ui/Logo.tsx";
-import React from "react";
+
 import { NavLink } from "react-router-dom";
 import { HardDrive, Trash2 } from "lucide-react"; // Імпортуємо гарні іконки
 

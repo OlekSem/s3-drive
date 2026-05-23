@@ -69,6 +69,7 @@ export const fileStorageApi = createApi({
                 method: "PATCH",
                 body: { newName },
             }),
+            // @ts-ignore
             invalidatesTags: (result, error, { id }) => [
                 { type: "Node", id },
                 { type: "Folder", id: "LIST" },
