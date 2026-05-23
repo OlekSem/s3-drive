@@ -487,32 +487,21 @@ export default function Finder({
                                 )}
                             </>
                         ) : (
+                            /* Натискання на порожнє місце (показуємо створення тільки на диску) */
                             mode === 'drive' && (
                                 <>
-                                    {onCreateFolder && (
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                onCreateFolder(currentFolderId);
-                                                setContextMenu(null);
-                                            }}
-                                            className={`w-full text-left px-3 py-2 ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}
-                                        >
-                                            New Folder
-                                        </button>
-                                    )}
-                                    {onUploadClick && (
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                onUploadClick(currentFolderId);
-                                                setContextMenu(null);
-                                            }}
-                                            className={`w-full text-left px-3 py-2 ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}
-                                        >
+                                    {onCreateFolder && <button onClick={() => onCreateFolder(currentFolderId)}
+                                                               className={`w-full text-left px-3 py-2 ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}>
+                                        New
+                                        Folder
+                                    </button>
+                                    }
+                                    {onUploadClick && <button className={`w-full text-left px-3 py-2 ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}>
+                                        <Link to={{pathname: "/upload", search: `?${searchParams.toString()}`}}>
                                             Upload Files Here
-                                        </button>
-                                    )}
+                                        </Link>
+                                    </button>
+                                    }
                                 </>
                             )
                         )}
@@ -528,7 +517,7 @@ export default function Finder({
                         await onRenameNode(renameTarget!.id, newName);
                         setRenameTarget(null);
                     }}
-                    onClose={() => setRenameTarget(null)}
+                    closeModal={() => setRenameTarget(null)}
                 />
             )}
         </>
