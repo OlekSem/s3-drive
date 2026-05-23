@@ -1,4 +1,4 @@
-import {useSearchParams} from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import {
     useCreateFolderMutation,
     useGetFolderViewQuery, useRenameNodeMutation,
@@ -23,13 +23,6 @@ export default function Folder(){
 
 
 
-    // const handleRenameNode = async (id: number, newName: string) => {
-    //     try {
-    //         await renameNode({ id, newName }).unwrap();
-    //     } catch (error) {
-    //         console.error('Rename failed:', error);
-    //     }
-    // };
 
     const [renameNode] = useRenameNodeMutation();
 
@@ -46,10 +39,12 @@ export default function Folder(){
         }
     };
 
-
-    const handleDeleteNode = async (nodeId: number) => {
+    // Змінюємо аргумент з поодинокого nodeId на масив nodeIds
+    const handleDeleteNode = async (nodeIds: number[]) => {
         try {
-            await softDeleteNode(nodeId).unwrap();
+            // Тепер передаємо сформований масив прямо в мутацію,
+            // оскільки Finder уже зібрав потрібні ID (один або декілька)
+            await softDeleteNode(nodeIds).unwrap();
         } catch (err) {
             console.log(err);
             alert("Error while deleting");
@@ -67,7 +62,7 @@ export default function Folder(){
                 error={error}
                 rootFolderName="Cloud Space"
                 onCreateFolder={handleCreateFolder}
-                onDeleteNode={handleDeleteNode}
+                onDeleteNode={handleDeleteNode} // Тепер типи ідеально збігаються
                 onDownloadFile={(file) => alert(`Downloading: ${file.storageKey}`)}
                 onRenameNode={handleRenameNode}
                 onUploadClick={(folderId) => alert(`Upload triggered for folder: ${folderId}`)}

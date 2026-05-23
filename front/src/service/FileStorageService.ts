@@ -26,20 +26,21 @@ export const fileStorageApi = createApi({
             }),
             invalidatesTags: [{ type: "Folder", id: "LIST" }, { type: "Node", id: "LIST" }],
         }),
-
         getFolderView: builder.query<INodeResponse[], { folderId?: number }>({
             query: ({ folderId }) => ({
                 url: "/folder/view",
                 method: "GET",
                 params: folderId ? { folderId } : {},
             }),
+            // ВИПРАВЛЕНО: додаємо прив'язку до тегу "Node", щоб список оновлювався при видаленні/відновленні
             providesTags: (result) =>
                 result
                     ? [
                         { type: "Folder", id: "LIST" },
-                        ...result.map(({ id }) => ({ type: "Folder" as const, id })),
+                        { type: "Node", id: "LIST" }, // Тег для всього списку нод
+                        ...result.map(({ id }) => ({ type: "Node" as const, id })), // Тег для кожної окремої ноди
                     ]
-                    : [{ type: "Folder", id: "LIST" }],
+                    : [{ type: "Folder", id: "LIST" }, { type: "Node", id: "LIST" }],
         }),
 
         // ================= FILE ENDPOINTS =================
@@ -84,12 +85,16 @@ export const fileStorageApi = createApi({
             providesTags: [{ type: "Node", id: "TRASH" }],
         }),
 
-        softDeleteNode: builder.mutation<void, number>({
-            query: (nodeId) => ({
-                url: "/nodes/SoftDelete",
-                method: "DELETE",
-                params: { nodeId },
+// service/FileStorageService.ts
+
+// Альтернативний залізобетонний варіант для сервісу, якщо звичайний body ігнорується:
+        softDeleteNode: builder.mutation<void, number[]>({
+            query: (nodeIds) => ({
+                url: '/nodes/SoftDelete',
+                method: 'DELETE',
+                body: nodeIds,
             }),
+            // ВИПРАВЛЕНО: тепер цей запит чітко каже оновити і звичайний список ("LIST"), і кошик ("TRASH")
             invalidatesTags: [
                 { type: "Node", id: "LIST" },
                 { type: "Node", id: "TRASH" },
@@ -97,11 +102,11 @@ export const fileStorageApi = createApi({
             ],
         }),
 
-        deleteNodePermanently: builder.mutation<void, { folderId?: number }>({
-            query: ({ folderId }) => ({
+        deleteNodePermanently: builder.mutation<void, number[]>({
+            query: (nodeIds) => ({
                 url: "/nodes/DeletePermanently",
                 method: "DELETE",
-                params: folderId ? { folderId } : {},
+                body: nodeIds, // Send the raw array as the JSON body
             }),
             invalidatesTags: [{ type: "Node", id: "TRASH" }],
         }),
