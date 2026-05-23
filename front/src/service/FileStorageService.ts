@@ -118,7 +118,6 @@ export const {
     useCreateFolderMutation,
     useGetFolderViewQuery,
     useUploadFileMutation,
-    useLazyDownloadFileQuery, // Using Lazy endpoint variant is standard practice for download triggers
     useRenameNodeMutation,
     useGetTrashNodesQuery,
     useSoftDeleteNodeMutation,
