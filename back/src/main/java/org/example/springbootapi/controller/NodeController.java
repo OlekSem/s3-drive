@@ -39,11 +39,26 @@ public class NodeController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> softDelete(
             @AuthenticationPrincipal User user,
-            @RequestParam Long nodeId
+            @RequestBody List<Long> nodeIds
     ) {
-        nodeService.softDelete(nodeId, user);
+        for (Long nodeId : nodeIds) {
+            nodeService.softDelete(nodeId, user);
+        }
         return ResponseEntity.noContent().build();
     }
+
+    @DeleteMapping("/DeletePermanently")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> deletePermanently(
+            @AuthenticationPrincipal User user,
+            @RequestBody List<Long> nodeIds
+    ) {
+        for (Long nodeId : nodeIds) {
+            nodeService.permanentDelete(nodeId, user);
+        }
+        return ResponseEntity.noContent().build();
+    }
+
 
     @GetMapping("/trash")
     @PreAuthorize("isAuthenticated()")
@@ -51,16 +66,6 @@ public class NodeController {
         System.out.println(user.getUsername());
         return ResponseEntity.ok(nodeService.getInTrash(folderId, user));
     }
-
-    @DeleteMapping("/DeletePermanently")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Void> DeletePermanently(@AuthenticationPrincipal User user, @RequestParam(required = false) Long folderId){
-        nodeService.permanentDelete(folderId, user);
-        return ResponseEntity.noContent().build();
-    }
-
-
-
 
 
     @PatchMapping("/rename/{id}")
