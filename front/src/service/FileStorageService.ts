@@ -93,7 +93,7 @@ export const fileStorageApi = createApi({
                 url: '/nodes/SoftDelete',
                 method: 'DELETE',
                 body: nodeIds,
-            }),
+                }),
             // ВИПРАВЛЕНО: тепер цей запит чітко каже оновити і звичайний список ("LIST"), і кошик ("TRASH")
             invalidatesTags: [
                 { type: "Node", id: "LIST" },
@@ -101,6 +101,23 @@ export const fileStorageApi = createApi({
                 { type: "Folder", id: "LIST" }
             ],
         }),
+
+        restoreNode: builder.mutation<void, number>({
+            query: (id) => ({
+                url: `/nodes/restore/${id}`,
+                method: 'PATCH',
+            }),
+            invalidatesTags: [
+                { type: "Node", id: "LIST" },
+                { type: "Node", id: "TRASH" },
+                { type: "Folder", id: "LIST" }
+            ],
+        }),
+
+
+
+
+
 
         deleteNodePermanently: builder.mutation<void, number[]>({
             query: (nodeIds) => ({

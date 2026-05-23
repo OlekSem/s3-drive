@@ -8,6 +8,7 @@ import { ThemeContext } from '../context/ThemeContext.ts';
 import type { INodeResponse } from "../interfaces.ts";
 import API_ENV from "../env";
 import RenameModalWindow from "../ui/RenameModalWindow.tsx";
+import {fileStorageApi} from "../service/FileStorageService.ts";
 
 export type NodeType = 'FILE' | 'FOLDER';
 
@@ -31,7 +32,7 @@ export default function Finder({
                                    isLoading = false,
                                    error = null,
                                    rootFolderName = "Cloud Space",
-                                   mode = 'drive',
+                                   mode = 'drive', // За замовчуванням це звичайний диск
                                    onCreateFolder,
                                    onDeleteNode,
                                    onDeletePermanently,
@@ -114,6 +115,7 @@ export default function Finder({
     const handleDownload = async (file: INodeResponse) => {
         try {
             setIsDownloading(true);
+            // 1. Fetch the data directly from your backend endpoint
             const token = localStorage.getItem("token");
             const response = await fetch(`${API_ENV.API_BASE_URL}/api/files/download/${file.id}`, {
                 method: 'GET',
@@ -126,15 +128,20 @@ export default function Finder({
                 throw new Error(`Server responded with status: ${response.status}`);
             }
 
+            // 2. Extract the file as a raw blob stream directly into browser memory
             const blobData = await response.blob();
+
+            // 3. Create a temporary local object pointer URL
             const downloadUrl = window.URL.createObjectURL(blobData);
 
+            // 4. Trigger the native browser save file dialog box
             const anchorLink = document.createElement('a');
             anchorLink.href = downloadUrl;
-            anchorLink.download = file.name;
+            anchorLink.download = file.name; // Preserves your filename extension
             document.body.appendChild(anchorLink);
             anchorLink.click();
 
+            // 5. Instantly clean up DOM nodes and release the file memory stream
             document.body.removeChild(anchorLink);
             window.URL.revokeObjectURL(downloadUrl);
 
@@ -144,6 +151,7 @@ export default function Finder({
             setIsDownloading(false);
         }
     };
+
 
     const colors = {
         bg: isDark ? 'bg-[#1e1e24] border-[#2a2a35] text-[#f5f5f7]' : 'bg-white border-gray-200 text-gray-900',
@@ -226,6 +234,8 @@ export default function Finder({
         return targetItem ? [targetItem.id] : [];
     };
 
+    const [restore] = fileStorageApi.useRestoreNodeMutation()
+
     const formatBytes = (bytes: number | null) => {
         if (bytes === null) return '--';
         if (bytes < 1024) return `${bytes} B`;
@@ -233,6 +243,9 @@ export default function Finder({
         if (kib < 1024) return `${kib.toFixed(1)} KB`;
         return `${(kib / 1024).toFixed(1)} MB`;
     };
+
+    if (isLoading) return <div className="p-6 text-center font-medium text-sm">Loading Files...</div>;
+    if (error) return <div className="p-6 text-center text-red-500 font-medium text-sm">Error loading files.</div>;
 
     const activeItems = getCurrentItems();
     const breadcrumbs = getBreadcrumbs();
@@ -391,49 +404,40 @@ export default function Finder({
                                     {selectedCount > 1 ? `Selected ${selectedCount} items` : contextMenu.targetItem.name}
                                 </div>
 
-                                {mode === 'trash' ? (
-                                    <>
-                                        {onRestoreNode && (
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    const ids = getTargetIds(contextMenu.targetItem);
-                                                    onRestoreNode(ids);
-                                                    setSelectedIds({});
-                                                    setContextMenu(null);
-                                                }}
-                                                className={`w-full text-left px-3 py-2 flex items-center gap-2 transition-colors ${isDark ? 'hover:bg-blue-600/30 text-blue-400' : 'hover:bg-blue-50 text-blue-600'}`}
-                                            >
-                                                <RefreshCw size={12} /> {selectedCount > 1 ? `Restore ${selectedCount} items` : 'Restore Item'}
-                                            </button>
-                                        )}
-                                        <div className={`h-px my-1 ${isDark ? 'bg-zinc-800' : 'bg-gray-100'}`} />
-                                        {onDeletePermanently && (
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    const ids = getTargetIds(contextMenu.targetItem);
-                                                    onDeletePermanently(ids);
-                                                    setSelectedIds({});
-                                                    setContextMenu(null);
-                                                }}
-                                                className="w-full text-left px-3 py-2 text-red-500 font-semibold hover:bg-red-500/10 transition-colors"
-                                            >
-                                                {selectedCount > 1 ? `Delete ${selectedCount} items permanently` : 'Delete permanently'}
-                                            </button>
-                                        )}
-                                    </>
-                                ) : (
-                                    <>
+                            {/* Якщо ми в СМІТНИКУ */}
+                            {mode === 'trash' ? (
+                                <>
+                                    {onRestoreNode && (
                                         <button
-                                            onClick={() => {
-                                                handleItemClick(contextMenu.targetItem!);
+                                            onClick={() => restore(contextMenu.targetItem!.id)}
+                                            className={`w-full text-left px-3 py-2 flex items-center gap-2 transition-colors ${isDark ? 'hover:bg-blue-600/30 text-blue-400' : 'hover:bg-blue-50 text-blue-600'}`}
+                                        >
+                                            <RefreshCw size={12} /> Restore Item
+                                        </button>
+                                    )}
+                                    <div className={`h-px my-1 ${isDark ? 'bg-zinc-800' : 'bg-gray-100'}`} />
+                                    {onDeletePermanently && (
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                const ids = getTargetIds(contextMenu.targetItem);
+                                                onDeletePermanently(ids);
+                                                setSelectedIds({});
                                                 setContextMenu(null);
                                             }}
-                                            className={`w-full text-left px-3 py-2 text-xs font-medium ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}
+                                            className="w-full text-left px-3 py-2 text-red-500 font-semibold hover:bg-red-500/10 transition-colors"
                                         >
-                                            {contextMenu.targetItem.type === 'FOLDER' ? 'Open Folder' : 'Select File'}
+                                            {selectedCount > 1 ? `Delete ${selectedCount} items permanently` : 'Delete permanently'}
                                         </button>
+                                    )}
+                                </>
+                            ) : (
+                                /* Якщо ми на звичайному ДИСКУ */
+                                <>
+                                    <button onClick={() => handleItemClick(contextMenu.targetItem!)}
+                                            className={`w-full text-left px-3 py-2 text-xs font-medium ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}>
+                                        {contextMenu.targetItem!.type === 'FOLDER' ? 'Open Folder' : 'Select File'}
+                                    </button>
 
                                         {contextMenu.targetItem.type === 'FILE' && (
                                             <button
