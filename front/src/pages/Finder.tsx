@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect, useRef } from 'react';
-import {Link, useSearchParams} from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
     X, Folder, File, ChevronRight, FileText, Calendar,
     HardDriveDownload, ArrowLeft, RefreshCw, Check, Trash2
@@ -62,23 +62,20 @@ export default function Finder({
 
     const selectedCount = Object.keys(selectedIds).filter(id => selectedIds[parseInt(id, 10)]).length;
 
-    // Закриття контекстного меню при кліку будь-де лівою кнопкою миші
     useEffect(() => {
         const handleWindowClick = (e: MouseEvent) => {
             if (e.button !== 0) return; // Реагуємо тільки на ліву кнопку миші
             const clickedInsideMenu = (e.target as HTMLElement).closest('.context-menu-wrapper');
-            if (!clickedInsideMenu) {
-                setContextMenu(null);
-            }
+            if (clickedInsideMenu) return;
+            setContextMenu(null);
         };
 
         if (contextMenu?.visible) {
-            window.addEventListener('mousedown', handleWindowClick);
+            window.addEventListener('click', handleWindowClick);
         }
-        return () => window.removeEventListener('mousedown', handleWindowClick);
+        return () => window.removeEventListener('click', handleWindowClick);
     }, [contextMenu?.visible]);
 
-    // Скидання виділення при кліку на порожнє місце
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (inspectorRef.current && inspectorRef.current.contains(event.target as Node)) return;
@@ -417,43 +414,42 @@ export default function Finder({
                                     {selectedCount > 1 ? `Selected ${selectedCount} items` : contextMenu.targetItem.name}
                                 </div>
 
-                                {mode === 'trash' ? (
-                                    <>
-                                        {onRestoreNode && (
-                                            <button
-                                                onClick={() => restore(contextMenu.targetItem!.id)}
-                                                className={`w-full text-left px-3 py-2 flex items-center gap-2 transition-colors ${isDark ? 'hover:bg-blue-600/30 text-blue-400' : 'hover:bg-blue-50 text-blue-600'}`}
-                                            >
-                                                <RefreshCw size={12} /> Restore Item
-                                            </button>
-                                        )}
-                                        <div className={`h-px my-1 ${isDark ? 'bg-zinc-800' : 'bg-gray-100'}`} />
-                                        {onDeletePermanently && (
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    const ids = getTargetIds(contextMenu.targetItem);
-                                                    onDeletePermanently(ids);
-                                                    setSelectedIds({});
-                                                    setContextMenu(null);
-                                                }}
-                                                className="w-full text-left px-3 py-2 text-red-500 font-semibold hover:bg-red-500/10 transition-colors"
-                                            >
-                                                {selectedCount > 1 ? `Delete ${selectedCount} items permanently` : 'Delete permanently'}
-                                            </button>
-                                        )}
-                                    </>
-                                ) : (
-                                    <>
+                            {/* Якщо ми в СМІТНИКУ */}
+                            {mode === 'trash' ? (
+                                <>
+                                    <button
+                                        onClick={() => {
+                                            restore(getTargetIds(contextMenu.targetItem));
+                                            setSelectedIds({});
+                                            setContextMenu(null);
+                                        }}
+                                        className={`w-full text-left px-3 py-2 flex items-center gap-2 transition-colors ${isDark ? 'hover:bg-blue-600/30 text-blue-400' : 'hover:bg-blue-50 text-blue-600'}`}
+                                    >
+                                        <RefreshCw size={12} /> Restore Item
+                                    </button>
+                                    <div className={`h-px my-1 ${isDark ? 'bg-zinc-800' : 'bg-gray-100'}`} />
+                                    {onDeletePermanently && (
                                         <button
-                                            onClick={() => {
-                                                // handleItemClick(contextMenu.targetItem!);
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                const ids = getTargetIds(contextMenu.targetItem);
+                                                onDeletePermanently(ids);
+                                                setSelectedIds({});
                                                 setContextMenu(null);
                                             }}
-                                            className={`w-full text-left px-3 py-2 text-xs font-medium ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}
+                                            className="w-full text-left px-3 py-2 text-red-500 font-semibold hover:bg-red-500/10 transition-colors"
                                         >
-                                            {contextMenu.targetItem.type === 'FOLDER' ? 'Open Folder' : 'Select File'}
+                                            {selectedCount > 1 ? `Delete ${selectedCount} items permanently` : 'Delete permanently'}
                                         </button>
+                                    )}
+                                </>
+                            ) : (
+                                /* Якщо ми на звичайному ДИСКУ */
+                                <>
+                                    <button onClick={() => handleItemClick(contextMenu.targetItem!)}
+                                            className={`w-full text-left px-3 py-2 text-xs font-medium ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}>
+                                        {contextMenu.targetItem!.type === 'FOLDER' ? 'Open Folder' : 'Select File'}
+                                    </button>
 
                                         {contextMenu.targetItem.type === 'FILE' && (
                                             <button

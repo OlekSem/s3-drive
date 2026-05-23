@@ -103,10 +103,11 @@ export const fileStorageApi = createApi({
             ],
         }),
 
-        restoreNode: builder.mutation<void, number>({
-            query: (id) => ({
-                url: `/nodes/restore/${id}`,
+        restoreNode: builder.mutation<void, number[]>({
+            query: (ids) => ({
+                url: `/nodes/restore`,
                 method: 'PATCH',
+                body: ids
             }),
             invalidatesTags: [
                 { type: "Node", id: "LIST" },
