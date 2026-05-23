@@ -102,6 +102,23 @@ export const fileStorageApi = createApi({
             ],
         }),
 
+        restoreNode: builder.mutation<void, number>({
+            query: (id) => ({
+                url: `/nodes/restore/${id}`,
+                method: 'PATCH',
+            }),
+            invalidatesTags: [
+                { type: "Node", id: "LIST" },
+                { type: "Node", id: "TRASH" },
+                { type: "Folder", id: "LIST" }
+            ],
+        }),
+
+
+
+
+
+
         deleteNodePermanently: builder.mutation<void, number[]>({
             query: (nodeIds) => ({
                 url: "/nodes/DeletePermanently",
