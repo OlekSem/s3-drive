@@ -44,7 +44,7 @@ public class FolderService {
             }
         }
 
-        boolean nameExists = nodeRepository.existsByParentAndNameAndOwner(
+        boolean nameExists = nodeRepository.existsByParentAndNameAndOwnerAndTrashIsFalse(
                 parent,
                 defaultName,
                 user

@@ -104,7 +104,7 @@ public class FileService {
         }
 
         // 3. Optional: Validate name uniqueness within the same parent folder
-        boolean nameExists = nodeRepository.existsByParentAndNameAndOwner(
+        boolean nameExists = nodeRepository.existsByParentAndNameAndOwnerAndTrashIsFalse(
                 node.getParent(),
                 requestDto.getNewName(),
                 user

@@ -9,7 +9,7 @@ import java.util.List;
 public interface NodeRepository extends JpaRepository<Node, Long> {
     List<Node> findAllByOwnerId(Long id);
     List<Node> findByOwnerIdAndParentIsNull(Long userId);
-    boolean existsByParentAndNameAndOwner(Node parent, String name, User user);
+    boolean existsByParentAndNameAndOwnerAndTrashIsFalse(Node parent, String name, User user);
 
     List<Node>  findByOwnerIdAndParentIsNullAndTrashIsFalse(Long userId);
 

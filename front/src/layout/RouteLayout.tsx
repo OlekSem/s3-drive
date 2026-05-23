@@ -4,6 +4,9 @@ import Home from "../pages/Home.tsx";
 import Upload from "../pages/Upload.tsx";
 import ProtectedRoute from "../components/ProtectedRoute.tsx";
 
+import Folder from "../pages/Folder.tsx";
+import Finder from "../pages/Finder.tsx";
+
 export const RouteLayout = () => {
     // const pages = [
     //     // { path: "/cities", element: <Cities /> },
@@ -16,6 +19,8 @@ export const RouteLayout = () => {
                 <Route path='/' element={<MainLayout />}>
                     {/* Public Routes */}
                     <Route index element={<Home />} />
+                    <Route path="/folder" element={<Folder />} />
+                    <Route path="/finder" element={<Finder />} />
 
                     {/* Protected Routes Block */}
                     <Route element={<ProtectedRoute redirectPath="/" />}>
