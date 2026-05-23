@@ -180,17 +180,21 @@ public class NodeService {
         deleteNodeRecursive(node);
     }
 
-    public void restoreNode(Long id) {
-        var node = nodeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Node not found: " + id));
-        if(node.isTrash()){
-            node.setTrash(false);
-        }else{
-            if(isInTrash(node)){
-                node.setParent(null);
+    public void restoreNode(List<Long> ids) {
+        for(Long id : ids){
+            var node = nodeRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Node not found: " + id));
+            if(node.isTrash()){
+                node.setTrash(false);
+            }else{
+                if(isInTrash(node)){
+                    node.setParent(null);
+                }
             }
+            nodeRepository.save(node);
         }
-        nodeRepository.save(node);
+
+
     }
 
     public boolean isInTrash(Node node) {
