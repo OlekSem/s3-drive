@@ -1,15 +1,23 @@
 @import "tailwindcss";
 
+/* 💡 Crucial line for Tailwind v4 to enable class-based dark mode switching */
+@variant dark (&:where(.dark, .dark *));
+
+@theme {
+    --color-bg: var(--bg);
+    --color-surface: var(--surface);
+    --color-border: var(--border);
+}
 
 :root {
-
     --bg: #F7F6F2;
+    --text-color: #1A1A18; /* Added missing primary text variable */
     --logo-text: #1A1A18;
     --logo: #F7F6F2;
     --surface: #FFFFFF;
     --border: #E5E3DC;
     --search: #F0EEE8;
-    --placeholder: #111110;
+    --placeholder: #706F6B; /* Made placeholder softer for light mode */
     --button-bg: #1A1A18;
     --button-text: #F7F6F2;
     --avatar-bg: #1A1A18;
@@ -19,12 +27,13 @@
 
 .dark {
     --bg: #111110;
+    --text-color: #F0EEE8; /* Added missing primary text variable */
     --logo-text: #F0EEE8;
     --logo: #111110;
     --surface: #1A1A18;
     --border: #2C2C2A;
     --search: #2C2C2A;
-    --placeholder: #F0EEE8;
+    --placeholder: #A09E98; /* Made placeholder softer for dark mode */
     --button-bg: #F0EEE8;
     --button-text: #111110;
     --avatar-bg: #F0EEE8;
