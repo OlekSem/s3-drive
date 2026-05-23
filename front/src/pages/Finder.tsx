@@ -1,41 +1,56 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { useSearchParams } from "react-router-dom";
-import { useGetFolderViewQuery, useCreateFolderMutation } from "../service/FileStorageService.ts";
-import { Folder, File, Trash2, HardDrive, ChevronRight, FileText, Calendar, HardDriveDownload, ArrowLeft } from 'lucide-react';
+import { Folder, File, Trash2, ChevronRight, FileText, Calendar, HardDriveDownload, ArrowLeft, RefreshCw } from 'lucide-react';
 import { ThemeContext } from '../context/ThemeContext.ts';
+import type {INodeResponse} from "../interfaces.ts";
 
 export type NodeType = 'FILE' | 'FOLDER';
+//
+// export interface NodeResponseDto {
+//     id: number;
+//     name: string;
+//     type: NodeType;
+//     size: number | null;
+//     mimeType: string | null;
+//     storageKey: string | null;
+//     userId: number;
+//     parentId: number | null;
+//     createdAt: string;
+//     updatedAt: string;
+// }
 
-export interface NodeResponseDto {
-    id: number;
-    name: string;
-    type: NodeType;
-    size: number | null;
-    mimeType: string | null;
-    storageKey: string | null;
-    userId: number;
-    parentId: number | null;
-    createdAt: string;
-    updatedAt: string;
+interface FinderProps {
+    nodes: INodeResponse[];
+    isLoading?: boolean;
+    error?: any;
+    rootFolderName?: string;
+    mode?: 'drive' | 'trash'; // <-- Новий проп для перемикання режимів
+    onCreateFolder?: (parentId: number | null) => Promise<void> | void;
+    onDeleteNode?: (nodeId: number) => Promise<void> | void; // Для звичайного видалення (в смітник)
+    onDeletePermanently?: (nodeId: number) => Promise<void> | void; // <-- Нове
+    onRestoreNode?: (nodeId: number) => Promise<void> | void; // <-- Нове
+    onDownloadFile?: (file: INodeResponse) => void;
+    onUploadClick?: (currentFolderId: number | null) => void;
 }
 
-export default function Finder() {
+export default function Finder({
+                                   nodes = [],
+                                   isLoading = false,
+                                   error = null,
+                                   rootFolderName = "Cloud Space",
+                                   mode = 'drive', // За замовчуванням це звичайний диск
+                                   onCreateFolder,
+                                   onDeleteNode,
+                                   onDeletePermanently,
+                                   onRestoreNode,
+                                   onDownloadFile,
+                                   onUploadClick
+                               }: FinderProps) {
     const [searchParams, setSearchParams] = useSearchParams();
-
-    // 1. Читаємо ID папки з URL. Якщо немає — залишаємо null для сумісності з іншим кодом
     const folderParam = searchParams.get('id');
     const currentFolderId = folderParam ? parseInt(folderParam, 10) : null;
 
-    const [currentView, setCurrentView] = useState<'DRIVE' | 'TRASH'>('DRIVE');
-    const [selectedFile, setSelectedFile] = useState<NodeResponseDto | null>(null);
-
-// 2. ПЕРЕДАЄМО ОБ'ЄКТ: замість чистого ID передаємо { folderId: ... }
-// Якщо currentFolderId === null, передаємо undefined, щоб params на бекенд не йшли
-    const { data: nodes = [], error, isLoading } = useGetFolderViewQuery({
-        folderId: currentFolderId !== null ? currentFolderId : undefined
-    });
-    const [createFolder, { isLoading: isCreating }] = useCreateFolderMutation();
-
+    const [selectedFile, setSelectedFile] = useState<INodeResponse | null>(null);
     const themeContext = useContext(ThemeContext);
     const isDark = themeContext?.theme === 'dark';
 
@@ -43,46 +58,25 @@ export default function Finder() {
         x: number;
         y: number;
         visible: boolean;
-        targetItem: NodeResponseDto | null;
+        targetItem: INodeResponse | null;
     } | null>(null);
 
     useEffect(() => {
         const closeMenu = () => {
-            if (contextMenu?.visible) {
-                setContextMenu(prev => prev ? { ...prev, visible: false } : null);
-            }
+            if (contextMenu?.visible) setContextMenu(prev => prev ? { ...prev, visible: false } : null);
         };
         window.addEventListener('click', closeMenu);
         return () => window.removeEventListener('click', closeMenu);
     }, [contextMenu]);
 
-    const handleContextMenu = (e: React.MouseEvent, item: NodeResponseDto | null) => {
+    const handleContextMenu = (e: React.MouseEvent, item: INodeResponse | null) => {
         e.preventDefault();
         e.stopPropagation();
-        setContextMenu({
-            x: e.clientX,
-            y: e.clientY,
-            visible: true,
-            targetItem: item
-        });
-    };
-
-    const handleCreateFolder = async () => {
-        console.log('Create folder');
-        try {
-            await createFolder({
-                parentId: currentFolderId !== null ? currentFolderId : undefined
-            }).unwrap();
-
-        } catch (err) {
-            console.error("Failed to create folder:", err);
-            alert("Failed to create folder");
-        }
+        setContextMenu({ x: e.clientX, y: e.clientY, visible: true, targetItem: item });
     };
 
     const colors = {
         bg: isDark ? 'bg-[#1e1e24] border-[#2a2a35] text-[#f5f5f7]' : 'bg-white border-gray-200 text-gray-900',
-        sidebar: isDark ? 'bg-[#141417] border-[#2a2a32]' : 'bg-gray-50 border-gray-200',
         body: isDark ? 'bg-[#1a1a1f]' : 'bg-gray-50/50',
         header: isDark ? 'bg-[#16161b] border-[#2a2a32]' : 'bg-gray-100/70 border-gray-200',
         textMuted: isDark ? 'text-gray-500' : 'text-gray-400',
@@ -95,9 +89,8 @@ export default function Finder() {
         divider: isDark ? 'bg-zinc-800' : 'bg-gray-200'
     };
 
-    // 3. Побудова хлібних крихт на основі масиву, який повернув сервер
-    const getBreadcrumbs = (): NodeResponseDto[] => {
-        const path: NodeResponseDto[] = [];
+    const getBreadcrumbs = (): INodeResponse[] => {
+        const path: INodeResponse[] = [];
         let currentId = currentFolderId;
         while (currentId !== null) {
             const folder = nodes.find(n => n.id === currentId);
@@ -111,20 +104,13 @@ export default function Finder() {
         return path;
     };
 
-    // 4. Фільтрація елементів відповідно до поточного ID в URL
     const getCurrentItems = () => {
         if (currentFolderId !== null) {
             return nodes.filter(n => n.parentId === currentFolderId);
         }
-        if (currentView === 'TRASH') {
-            // Для смітника: фільтруємо за логікою вашої бізнес-моделі (наприклад, id 6 або 7, або поля isDeleted)
-            return nodes.filter(n => n.id === 6 || n.id === 7);
-        }
-        // Корінь: показуємо тільки ті елементи, у яких немає parentId
-        return nodes.filter(n => n.parentId === null && n.id !== 6 && n.id !== 7);
+        return nodes.filter(n => n.parentId === null);
     };
 
-    // 5. Навігація через оновлення параметрів URL
     const navigateToFolder = (id: number | null) => {
         if (id === null) {
             searchParams.delete('id');
@@ -135,7 +121,7 @@ export default function Finder() {
         setSelectedFile(null);
     };
 
-    const handleItemClick = (item: NodeResponseDto) => {
+    const handleItemClick = (item: INodeResponse) => {
         if (item.type === 'FOLDER') {
             navigateToFolder(item.id);
         } else {
@@ -151,8 +137,8 @@ export default function Finder() {
         return `${(kib / 1024).toFixed(1)} MB`;
     };
 
-    if (isLoading) return <div className="p-6 text-center font-medium">Loading your files...</div>;
-    if (error) return <div className="p-6 text-center text-red-500 font-medium">Error loading files.</div>;
+    if (isLoading) return <div className="p-6 text-center font-medium text-sm">Loading Files...</div>;
+    if (error) return <div className="p-6 text-center text-red-500 font-medium text-sm">Error loading files.</div>;
 
     const activeItems = getCurrentItems();
     const breadcrumbs = getBreadcrumbs();
@@ -161,41 +147,10 @@ export default function Finder() {
         <div onContextMenu={(e) => handleContextMenu(e, null)}
              className={`flex w-full h-[580px] font-sans rounded-xl overflow-hidden shadow-2xl border transition-colors duration-200 ${colors.bg}`}>
 
-            {/* SIDEBAR NAVIGATION */}
-            <aside className={`w-[200px] p-4 border-r flex flex-col gap-4 select-none ${colors.sidebar}`}>
-                <span className={`text-[11px] font-bold uppercase tracking-wider px-2 ${colors.textMuted}`}>
-                    Locations
-                </span>
-                <nav className="flex flex-col gap-1">
-                    <button
-                        onClick={() => { setCurrentView('DRIVE'); navigateToFolder(null); }}
-                        className={`flex items-center gap-3 w-full px-3 py-2 text-sm font-medium rounded-lg text-left transition-colors duration-150 ${
-                            currentView === 'DRIVE' && currentFolderId === null
-                                ? 'bg-blue-600 text-white shadow-sm'
-                                : `hover:text-current ${colors.textLabel} ${colors.itemHover}`
-                        }`}
-                    >
-                        <HardDrive size={16} className={currentView === 'DRIVE' && currentFolderId === null ? 'text-white' : 'text-blue-500'} />
-                        My Drive
-                    </button>
-                    <button
-                        onClick={() => { setCurrentView('TRASH'); navigateToFolder(null); }}
-                        className={`flex items-center gap-3 w-full px-3 py-2 text-sm font-medium rounded-lg text-left transition-colors duration-150 ${
-                            currentView === 'TRASH'
-                                ? 'bg-red-600 text-white shadow-sm'
-                                : `hover:text-current ${colors.textLabel} ${colors.itemHover}`
-                        }`}
-                    >
-                        <Trash2 size={16} className={currentView === 'TRASH' ? 'text-white' : 'text-red-500'} />
-                        Trash Bin
-                    </button>
-                </nav>
-            </aside>
-
-            {/* ICON GRID PLATFORM FIELD */}
+            {/* ОСНОВНА ПАНЕЛЬ ЕКСПЛОРЕРА */}
             <div className={`flex-1 flex flex-col min-w-0 ${colors.body}`}>
 
-                {/* NAV BAR HEADER BREADCRUMBS */}
+                {/* ХЛІБНІ КРИХТИ */}
                 <header className={`h-12 border-b px-4 flex items-center gap-3 select-none flex-shrink-0 ${colors.header}`}>
                     {currentFolderId !== null && (
                         <button
@@ -210,11 +165,8 @@ export default function Finder() {
                     )}
 
                     <div className={`flex items-center gap-1.5 text-xs font-medium overflow-x-auto whitespace-nowrap ${colors.textLabel}`}>
-                        <span
-                            onClick={() => navigateToFolder(null)}
-                            className="hover:text-blue-500 cursor-pointer"
-                        >
-                            {currentView === 'DRIVE' ? 'My Drive' : 'Trash Bin'}
+                        <span onClick={() => navigateToFolder(null)} className="hover:text-blue-500 cursor-pointer">
+                            {mode === 'trash' ? 'Trash Bin' : rootFolderName}
                         </span>
                         {breadcrumbs.map((folder, index) => (
                             <React.Fragment key={folder.id}>
@@ -230,11 +182,11 @@ export default function Finder() {
                     </div>
                 </header>
 
-                {/* ICON CONTAINER GRID LAYOUT */}
+                {/* СІТКА ЕЛЕМЕНТІВ */}
                 <main className="flex-1 p-6 overflow-y-auto grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-6 content-start auto-rows-max">
                     {activeItems.length === 0 ? (
                         <div className={`col-span-full text-center py-20 font-medium italic text-sm ${colors.textMuted}`}>
-                            Empty folder
+                            {mode === 'trash' ? 'Trash is empty' : 'Empty folder'}
                         </div>
                     ) : (
                         activeItems.map(item => {
@@ -245,9 +197,7 @@ export default function Finder() {
                                     onClick={() => handleItemClick(item)}
                                     onContextMenu={(e) => handleContextMenu(e, item)}
                                     className={`flex flex-col items-center p-3 rounded-xl cursor-pointer transition-all duration-150 group select-none ${
-                                        isFileSelected
-                                            ? 'bg-blue-500/20 ring-2 ring-blue-500'
-                                            : colors.itemHover
+                                        isFileSelected ? 'bg-blue-500/20 ring-2 ring-blue-500' : colors.itemHover
                                     }`}
                                 >
                                     <div className="w-16 h-16 flex items-center justify-center mb-2 relative">
@@ -266,7 +216,6 @@ export default function Finder() {
                                             </div>
                                         )}
                                     </div>
-
                                     <span className="text-xs text-center w-full break-words line-clamp-2 px-1 font-medium leading-tight">
                                         {item.name}
                                     </span>
@@ -277,17 +226,14 @@ export default function Finder() {
                 </main>
             </div>
 
-            {/* METADATA SIDE INSPECTOR CONTEXT WINDOW */}
+            {/* ІНСПЕКТОР ФАЙЛІВ Справа */}
             {selectedFile && (
-                <aside className={`w-[260px] border-l p-6 flex flex-col items-center flex-shrink-0 select-none animate-fadeIn ${colors.inspector}`}>
+                <aside className={`w-[260px] border-l p-6 flex flex-col items-center flex-shrink-0 select-none ${colors.inspector}`}>
                     <div className={`p-5 rounded-2xl border mb-4 ${colors.previewContainer}`}>
                         <FileText size={48} className="text-blue-500" />
                     </div>
-                    <h3 className="font-semibold text-sm text-center w-full truncate px-2 mb-2" title={selectedFile.name}>
-                        {selectedFile.name}
-                    </h3>
+                    <h3 className="font-semibold text-sm text-center w-full truncate px-2 mb-2">{selectedFile.name}</h3>
                     <div className={`w-full h-px my-2 ${colors.divider}`} />
-
                     <div className="w-full flex flex-col gap-3 text-[11px] mt-2">
                         <div className="flex justify-between">
                             <span className={colors.textLabel}>Kind</span>
@@ -311,14 +257,12 @@ export default function Finder() {
                 </aside>
             )}
 
-            {/* FLOATING CONTEXT MENU */}
+            {/* КОНТЕКСТНЕ МЕНЮ — ДИНАМІЧНЕ ЗАЛЕЖНО ВІД MODE */}
             {contextMenu && contextMenu.visible && (
                 <div
                     style={{ top: contextMenu.y, left: contextMenu.x }}
-                    className={`fixed z-50 w-48 py-1 rounded-lg shadow-xl border text-xs select-none backdrop-blur-md animate-fadeIn ${
-                        isDark
-                            ? 'bg-[#1b1b22]/95 border-[#2c2c3a] text-gray-200'
-                            : 'bg-white/95 border-gray-200 text-gray-800'
+                    className={`fixed z-50 w-48 py-1 rounded-lg shadow-xl border text-xs select-none backdrop-blur-md ${
+                        isDark ? 'bg-[#1b1b22]/95 border-[#2c2c3a] text-gray-200' : 'bg-white/95 border-gray-200 text-gray-800'
                     }`}
                 >
                     {contextMenu.targetItem ? (
@@ -326,48 +270,56 @@ export default function Finder() {
                             <div className="px-3 py-1.5 font-semibold opacity-50 truncate border-b border-current/10">
                                 {contextMenu.targetItem.name}
                             </div>
-                            <button
-                                onClick={() => handleItemClick(contextMenu.targetItem!)}
-                                className={`w-full text-left px-3 py-2 transition-colors ${isDark ? 'hover:bg-blue-600/30 text-blue-400' : 'hover:bg-blue-50 text-blue-600'}`}
-                            >
-                                {contextMenu.targetItem.type === 'FOLDER' ? 'Open Folder' : 'Select File'}
-                            </button>
-                            <button
-                                onClick={() => alert(`Downloading S3 Key: ${contextMenu.targetItem?.storageKey}`)}
-                                className={`w-full text-left px-3 py-2 transition-colors ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}
-                            >
-                                Download
-                            </button>
-                            <div className={`h-px my-1 ${isDark ? 'bg-zinc-800' : 'bg-gray-100'}`} />
-                            <button
-                                onClick={() => alert(`Moving item ${contextMenu.targetItem?.id} to Trash`)}
-                                className="w-full text-left px-3 py-2 text-red-500 hover:bg-red-500/10 transition-colors"
-                            >
-                                Delete permanently
-                            </button>
+
+                            {/* Якщо ми в СМІТНИКУ */}
+                            {mode === 'trash' ? (
+                                <>
+                                    {onRestoreNode && (
+                                        <button
+                                            onClick={() => onRestoreNode!(contextMenu.targetItem!.id)}
+                                            className={`w-full text-left px-3 py-2 flex items-center gap-2 transition-colors ${isDark ? 'hover:bg-blue-600/30 text-blue-400' : 'hover:bg-blue-50 text-blue-600'}`}
+                                        >
+                                            <RefreshCw size={12} /> Restore Item
+                                        </button>
+                                    )}
+                                    <div className={`h-px my-1 ${isDark ? 'bg-zinc-800' : 'bg-gray-100'}`} />
+                                    {onDeletePermanently && (
+                                        <button
+                                            onClick={() => onDeletePermanently!(contextMenu.targetItem!.id)}
+                                            className="w-full text-left px-3 py-2 text-red-500 font-semibold hover:bg-red-500/10 transition-colors"
+                                        >
+                                            Delete permanently
+                                        </button>
+                                    )}
+                                </>
+                            ) : (
+                                /* Якщо ми на звичайному ДИСКУ */
+                                <>
+                                    <button onClick={() => handleItemClick(contextMenu.targetItem!)} className={`w-full text-left px-3 py-2 ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}>
+                                        {contextMenu.targetItem.type === 'FOLDER' ? 'Open Folder' : 'Select File'}
+                                    </button>
+                                    {onDownloadFile && (
+                                        <button onClick={() => onDownloadFile(contextMenu.targetItem!)} className={`w-full text-left px-3 py-2 ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}>
+                                            Download
+                                        </button>
+                                    )}
+                                    <div className={`h-px my-1 ${isDark ? 'bg-zinc-800' : 'bg-gray-100'}`} />
+                                    {onDeleteNode && (
+                                        <button onClick={() => onDeleteNode(contextMenu.targetItem!.id)} className="w-full text-left px-3 py-2 text-red-500 hover:bg-red-500/10 transition-colors">
+                                            Move to Trash
+                                        </button>
+                                    )}
+                                </>
+                            )}
                         </>
                     ) : (
-                        <>
-                            <button
-                                onClick={() => handleCreateFolder()}
-                                className={`w-full text-left px-3 py-2 transition-colors ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}
-                            >
-                                New Folder
-                            </button>
-                            <button
-                                onClick={() => alert('Opening local S3 upload dialog...')}
-                                className={`w-full text-left px-3 py-2 transition-colors ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}
-                            >
-                                Upload Files Here
-                            </button>
-                            <div className={`h-px my-1 ${isDark ? 'bg-zinc-800' : 'bg-gray-100'}`} />
-                            <button
-                                onClick={() => navigateToFolder(null)}
-                                className={`w-full text-left px-3 py-2 transition-colors ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}
-                            >
-                                Go to Root Directory
-                            </button>
-                        </>
+                        /* Натискання на порожнє місце (показуємо створення тільки на диску) */
+                        mode === 'drive' && (
+                            <>
+                                {onCreateFolder && <button onClick={() => onCreateFolder(currentFolderId)} className={`w-full text-left px-3 py-2 ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}>New Folder</button>}
+                                {onUploadClick && <button onClick={() => onUploadClick(currentFolderId)} className={`w-full text-left px-3 py-2 ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}>Upload Files Here</button>}
+                            </>
+                        )
                     )}
                 </div>
             )}

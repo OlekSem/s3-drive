@@ -1,29 +1,59 @@
 import {useSearchParams} from "react-router-dom";
-import {useGetFolderViewQuery} from "../service/FileStorageService.ts";
+import {
+    useCreateFolderMutation,
+    useGetFolderViewQuery,
+    useSoftDeleteNodeMutation
+} from "../service/FileStorageService.ts";
+import Finder from "./Finder.tsx";
 
 
 export default function Folder(){
-    const [searchParams, setSearchParams] = useSearchParams();
+    const [searchParams] = useSearchParams();
+    const folderParam = searchParams.get('id');
+    const currentFolderId = folderParam ? parseInt(folderParam, 10) : null;
 
-    // Grabs the value of 'id' from the URL (e.g., /finder?id=abc)
-    const id = searchParams.get('id');
+    // Стягуємо дані
+    const { data: files = [], error, isLoading } = useGetFolderViewQuery({
+        folderId: currentFolderId !== null ? currentFolderId : undefined
+    });
 
-    const { data: nodes, error, isLoading } = useGetFolderViewQuery({});
+    const [createFolder] = useCreateFolderMutation();
+    const [softDeleteNode] = useSoftDeleteNodeMutation();
 
-    if (isLoading) return <div>Loading your files...</div>;
-    if (error) return <div>Error loading files.</div>;
+    // Обертаємо мутації в прості обробники подій
+    const handleCreateFolder = async (parentId: number | null) => {
+        try {
+            await createFolder({ parentId: parentId ?? undefined }).unwrap();
+        } catch (err) {
+            console.log(err);
+            alert("Failed to create folder");
+        }
+    };
+
+    const handleDeleteNode = async (nodeId: number) => {
+        try {
+            await softDeleteNode(nodeId).unwrap();
+        } catch (err) {
+            console.log(err);
+            alert("Error while deleting");
+        }
+    };
 
     return (
-        <div>
-            <h2>Files and Folders</h2>
-            <ul>
-                {nodes?.map((node) => (
-                    <li key={node.id}>
-                        {/* Render file or folder specific UI here */}
-                        {node.name}
-                    </li>
-                ))}
-            </ul>
+        <div className="p-8">
+            <h1 className="text-2xl font-bold mb-4">Storage Explorer</h1>
+
+
+            <Finder
+                nodes={files}
+                isLoading={isLoading}
+                error={error}
+                rootFolderName="Cloud Space"
+                onCreateFolder={handleCreateFolder}
+                onDeleteNode={handleDeleteNode}
+                onDownloadFile={(file) => alert(`Downloading: ${file.storageKey}`)}
+                onUploadClick={(folderId) => alert(`Upload triggered for folder: ${folderId}`)}
+            />
         </div>
     )
 }
