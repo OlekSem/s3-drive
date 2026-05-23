@@ -32,7 +32,7 @@ const Upload = () => {
 
             // Redirect back to folder view context after a brief success confirmation delay
             setTimeout(() => {
-                navigate(parentId ? `/folder?id=${parentId}` : "/");
+                navigate(parentId ? `/folder?id=${parentId}` : "/folder");
             }, 1500);
         } catch (err) {
             console.error("Помилка під час завантаження файла:", err);
