@@ -69,7 +69,7 @@ public class NodeController {
             @PathVariable Long id,
             @AuthenticationPrincipal User user,
             @Valid @RequestBody RenameNodeRequestDto requestDto) {
-        NodeResponseDto updatedNode = fileService.renameNode(user, id, requestDto);
+        NodeResponseDto updatedNode = nodeService.renameNode(user, id, requestDto);
         return ResponseEntity.ok(updatedNode);
     }
 
