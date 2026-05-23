@@ -1,6 +1,11 @@
 import {BrowserRouter, Route, Routes} from "react-router-dom";
 import MainLayout from "./MainLayout.tsx";
 import Home from "../pages/Home.tsx";
+import Upload from "../pages/Upload.tsx";
+import ProtectedRoute from "../components/ProtectedRoute.tsx";
+
+import Folder from "../pages/Folder.tsx";
+import Finder from "../pages/Finder.tsx";
 
 export const RouteLayout = () => {
     // const pages = [
@@ -11,15 +16,18 @@ export const RouteLayout = () => {
     return (
         <BrowserRouter>
             <Routes>
-                <Route path='/' element={<MainLayout/>}>
+                <Route path='/' element={<MainLayout />}>
+                    {/* Public Routes */}
                     <Route index element={<Home />} />
-                    {/*{pages.map((page) => (*/}
-                    {/*    <Route*/}
-                    {/*        key={page.path}*/}
-                    {/*        path={page.path}*/}
-                    {/*        element={page.element}*/}
-                    {/*    />*/}
-                    {/*))}*/}
+                    <Route path="/folder" element={<Folder />} />
+                    <Route path="/finder" element={<Finder />} />
+
+                    {/* Protected Routes Block */}
+                    <Route element={<ProtectedRoute redirectPath="/" />}>
+                        <Route path='upload' element={<Upload />} />
+                        {/* You can drop any other private routes here easily */}
+                    </Route>
+
                 </Route>
             </Routes>
         </BrowserRouter>
