@@ -1,9 +1,13 @@
 
-const Home = () => {
+import {useEffect} from "react";
+import {useNavigate} from "react-router-dom";
 
-    return (
-        <></>
-    );
+const Home = () => {
+    const navigate = useNavigate();
+    useEffect(() => {
+        navigate("/AllFiles");
+    })
+    return null;
 };
 
 export default Home;

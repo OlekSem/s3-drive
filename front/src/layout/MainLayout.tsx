@@ -1,20 +1,25 @@
 
 import {Outlet} from "react-router-dom";
-import Header from "../components/header.tsx";
+
 import Navbar from "../components/Navbar.tsx";
+
+import Header from "../components/Header.tsx";
 
 
 const MainLayout = () => {
     return (
-        <div className="w-full h-full bg-[var(--bg)] ">
-            <div className="flex flex-row">
-                <Navbar />
-                <Header />
-            </div>
+        <div className="flex h-screen w-full overflow-hidden">
 
-            <main className="flex-1">
-                <Outlet />
-            </main>
+            <Navbar />
+
+
+            <div className="flex flex-col flex-1 ">
+                <Header />
+
+                <main className="flex-1 overflow-auto">
+                    <Outlet />
+                </main>
+            </div>
         </div>
     );
 };
