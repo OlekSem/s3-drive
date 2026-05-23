@@ -58,6 +58,7 @@ public class AppSeedData {
             user.setUsername("admin@gmail.com");
             user.setEmail("admin@gmail.com");
             user.setPassword(passwordEncoder.encode("123456"));
+            user.setImage("default.png");
             user.setRoles(Set.of(role));
             userRepository.save(user);
             System.out.println("User was created");

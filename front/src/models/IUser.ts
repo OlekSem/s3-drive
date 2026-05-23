@@ -1,4 +1,6 @@
 export default interface IUser{
     username:string,
-    avatar:string,
+    roles: string[],
+    sub: string,
+    image:string,
 }

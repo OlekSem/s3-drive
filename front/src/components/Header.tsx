@@ -15,7 +15,7 @@ const Header = () => {
          border-[var(--border)]
          ">
             <ThemeSwitch />
-            <Search />
+            {/*<Search />*/}
             <UploadButton />
             <Avatar />
         </div>
