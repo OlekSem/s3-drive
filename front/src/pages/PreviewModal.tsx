@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { X, Loader2, FileText } from 'lucide-react';
 import type { INodeResponse } from "../interfaces.ts";
 import API_ENV from "../env";

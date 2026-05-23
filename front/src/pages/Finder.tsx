@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect, useRef } from 'react';
-import { useSearchParams } from "react-router-dom";
+import {Link, useSearchParams} from "react-router-dom";
 import {
     X, Folder, File, ChevronRight, FileText, Calendar,
     HardDriveDownload, ArrowLeft, RefreshCw, Check, Trash2
@@ -255,8 +255,8 @@ export default function Finder({
         return `${(kib / 1024).toFixed(1)} MB`;
     };
 
-    if (isLoading) return <div className="p-6 text-center font-medium text-sm">Loading Files...</div>;
-    if (error) return <div className="p-6 text-center text-red-500 font-medium text-sm">Error loading files.</div>;
+    // if (isLoading) return <div className="p-6 text-center font-medium text-sm">Loading Files...</div>;
+    // if (error) return <div className="p-6 text-center text-red-500 font-medium text-sm">Error loading files.</div>;
 
     const activeItems = getCurrentItems();
     const breadcrumbs = getBreadcrumbs();
@@ -447,7 +447,7 @@ export default function Finder({
                                     <>
                                         <button
                                             onClick={() => {
-                                                handleItemClick(contextMenu.targetItem!);
+                                                // handleItemClick(contextMenu.targetItem!);
                                                 setContextMenu(null);
                                             }}
                                             className={`w-full text-left px-3 py-2 text-xs font-medium ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}
@@ -467,7 +467,19 @@ export default function Finder({
                                             >
                                                 {isDownloading ? "Downloading..." : "Download"}
                                             </button>
-                                        )}
+                                        )
+                                        &&
+                                            <button
+                                                onClick={() => {
+                                                    handleItemClick(contextMenu.targetItem!);
+                                                    setContextMenu(null);
+                                                }}
+                                                disabled={isDownloading}
+                                                className={`w-full text-left px-3 py-2 text-xs font-medium ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'} disabled:opacity-50`}
+                                            >
+                                                Get Info
+                                            </button>
+                                        }
 
                                         <div className={`h-px my-1 ${isDark ? 'bg-zinc-800' : 'bg-gray-100'}`} />
 
@@ -540,7 +552,7 @@ export default function Finder({
                         await onRenameNode(renameTarget!.id, newName);
                         setRenameTarget(null);
                     }}
-                    // @ts-expect-error
+
                     closeModal={() => setRenameTarget(null)}
                 />
             )}

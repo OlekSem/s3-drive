@@ -1,6 +1,6 @@
 import Avatar from "../ui/Avatar.tsx";
 import ThemeSwitch from "../ui/ThemeSwitch.tsx";
-import Search from "../ui/Search";
+
 import UploadButton from "../ui/UploadButton";
 
 
