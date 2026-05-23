@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.springbootapi.constant.NodeType;
 import org.example.springbootapi.constant.RoleConstants;
 import org.example.springbootapi.dto.node.NodeResponseDto;
+import org.example.springbootapi.dto.node.RenameNodeRequestDto;
 import org.example.springbootapi.entity.Node;
 import org.example.springbootapi.entity.PermissionNode;
 import org.example.springbootapi.entity.Role;
@@ -34,6 +35,33 @@ public class NodeService {
     private final NodeMapper nodeMapper;
     private final PermissionService permissionService;
 
+    @Transactional
+    public NodeResponseDto renameNode(User user, Long nodeId, RenameNodeRequestDto requestDto){
+        Node node = nodeRepository.findById(nodeId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item not found"));
+
+        if (!permissionService.canRead(user, node)) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "You don't have enough rights to rename this item"
+            );
+        }
+
+        // 3. Optional: Validate name uniqueness within the same parent folder
+        boolean nameExists = nodeRepository.existsByParentAndNameAndOwnerAndTrashIsFalse(
+                node.getParent(),
+                requestDto.getNewName(),
+                user
+        );
+
+        if(nameExists) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "An item with this name already exists in this folder");
+        }
+
+        node.setName(requestDto.getNewName());
+        Node updatedNode = nodeRepository.save(node);
+        return nodeMapper.toDto(updatedNode);
+    }
 
     @Transactional
     public void softDelete(Long nodeId, User user){

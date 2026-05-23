@@ -53,6 +53,16 @@ public class FileService {
             }
         }
 
+        boolean nameExists = nodeRepository.existsByParentAndNameAndOwnerAndTrashIsFalse(
+                parent,
+                file.getOriginalFilename(),
+                user
+        );
+
+        if (nameExists) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "An item with this name already exists in this folder");
+        }
+
         Node node = Node.builder()
                 .storageKey(storageKey)
                 .name(file.getOriginalFilename())
@@ -67,6 +77,7 @@ public class FileService {
 
         return nodeRepository.save(node);
     }
+
 
 
     public ResponseEntity<Void> downloadFile(User user, Long id) {

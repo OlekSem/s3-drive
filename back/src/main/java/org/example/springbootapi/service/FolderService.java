@@ -66,6 +66,7 @@ public class FolderService {
         return nodeRepository.save(folder);
     }
 
+
     @Transactional
     public List<NodeResponseDto> view(Long folderId, User user) {
         if (folderId == null) {
