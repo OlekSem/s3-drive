@@ -53,16 +53,6 @@ public class FileService {
             }
         }
 
-        boolean nameExists = nodeRepository.existsByParentAndNameAndOwner(
-                parent,
-                file.getOriginalFilename(),
-                user
-        );
-
-        if (nameExists) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "An item with this name already exists in this folder");
-        }
-
         Node node = Node.builder()
                 .storageKey(storageKey)
                 .name(file.getOriginalFilename())
@@ -99,5 +89,33 @@ public class FileService {
                 .build();
 
 
+    }
+
+    @Transactional
+    public NodeResponseDto renameNode(User user, Long nodeId, RenameNodeRequestDto requestDto){
+        Node node = nodeRepository.findById(nodeId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Item not found"));
+
+        if (!permissionService.canRead(user, node)) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "You don't have enough rights to rename this item"
+            );
+        }
+
+        // 3. Optional: Validate name uniqueness within the same parent folder
+        boolean nameExists = nodeRepository.existsByParentAndNameAndOwnerAndTrashIsFalse(
+                node.getParent(),
+                requestDto.getNewName(),
+                user
+        );
+
+        if(nameExists) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "An item with this name already exists in this folder");
+        }
+
+        node.setName(requestDto.getNewName());
+        Node updatedNode = nodeRepository.save(node);
+        return nodeMapper.toDto(updatedNode);
     }
 }
