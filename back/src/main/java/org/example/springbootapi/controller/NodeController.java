@@ -72,6 +72,14 @@ public class NodeController {
         NodeResponseDto updatedNode = nodeService.renameNode(user, id, requestDto);
         return ResponseEntity.ok(updatedNode);
     }
+    @PatchMapping("/restore/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> restoreNode(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User user) {
+        nodeService.restoreNode(id);
+        return ResponseEntity.ok().build();
+    }
 
 
 }
