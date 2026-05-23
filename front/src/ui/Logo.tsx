@@ -15,7 +15,7 @@ const Logo = () => {
                     className="
                     text-xl font-bold text-[var(--logo-text)]
                 ">
-                    Drive
+                    s3drive
                 </div>
             </div>
         </a>
