@@ -1,10 +1,11 @@
 import {useSearchParams} from "react-router-dom";
 import {
     useCreateFolderMutation,
-    useGetFolderViewQuery,
+    useGetFolderViewQuery, useRenameNodeMutation,
     useSoftDeleteNodeMutation
 } from "../service/FileStorageService.ts";
 import Finder from "./Finder.tsx";
+
 
 
 export default function Folder(){
@@ -20,7 +21,22 @@ export default function Folder(){
     const [createFolder] = useCreateFolderMutation();
     const [softDeleteNode] = useSoftDeleteNodeMutation();
 
-    // Обертаємо мутації в прості обробники подій
+
+
+    // const handleRenameNode = async (id: number, newName: string) => {
+    //     try {
+    //         await renameNode({ id, newName }).unwrap();
+    //     } catch (error) {
+    //         console.error('Rename failed:', error);
+    //     }
+    // };
+
+    const [renameNode] = useRenameNodeMutation();
+
+    const handleRenameNode = async (id: number, newName: string) => {
+        await renameNode({ id, newName }).unwrap();
+    };
+
     const handleCreateFolder = async (parentId: number | null) => {
         try {
             await createFolder({ parentId: parentId ?? undefined }).unwrap();
@@ -29,6 +45,7 @@ export default function Folder(){
             alert("Failed to create folder");
         }
     };
+
 
     const handleDeleteNode = async (nodeId: number) => {
         try {
@@ -52,6 +69,7 @@ export default function Folder(){
                 onCreateFolder={handleCreateFolder}
                 onDeleteNode={handleDeleteNode}
                 onDownloadFile={(file) => alert(`Downloading: ${file.storageKey}`)}
+                onRenameNode={handleRenameNode}
                 onUploadClick={(folderId) => alert(`Upload triggered for folder: ${folderId}`)}
             />
         </div>

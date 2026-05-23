@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { Folder, File, ChevronRight, FileText, Calendar, HardDriveDownload, ArrowLeft, RefreshCw } from 'lucide-react';
 import { ThemeContext } from '../context/ThemeContext.ts';
 import type {INodeResponse} from "../interfaces.ts";
+import RenameModalWindow from "../ui/RenameModalWindow.tsx";
 
 export type NodeType = 'FILE' | 'FOLDER';
 //
@@ -30,6 +31,7 @@ interface FinderProps {
     onDeletePermanently?: (nodeId: number) => Promise<void> | void; // <-- Нове
     onRestoreNode?: (nodeId: number) => Promise<void> | void; // <-- Нове
     onDownloadFile?: (file: INodeResponse) => void;
+    onRenameNode?: (іd: number, newName: string) => Promise<void>;
     onUploadClick?: (currentFolderId: number | null) => void;
 }
 
@@ -44,6 +46,7 @@ export default function Finder({
                                    onDeletePermanently,
                                    onRestoreNode,
                                    onDownloadFile,
+                                   onRenameNode,
                                    onUploadClick
                                }: FinderProps) {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -136,6 +139,7 @@ export default function Finder({
         if (kib < 1024) return `${kib.toFixed(1)} KB`;
         return `${(kib / 1024).toFixed(1)} MB`;
     };
+    const [renameTarget, setRenameTarget] = useState<INodeResponse | null>(null);
 
     if (isLoading) return <div className="p-6 text-center font-medium text-sm">Loading Files...</div>;
     if (error) return <div className="p-6 text-center text-red-500 font-medium text-sm">Error loading files.</div>;
@@ -144,6 +148,7 @@ export default function Finder({
     const breadcrumbs = getBreadcrumbs();
 
     return (
+        <>
         <div onContextMenu={(e) => handleContextMenu(e, null)}
              className={`flex w-full h-[580px] font-sans rounded-xl overflow-hidden shadow-2xl border transition-colors duration-200 ${colors.bg}`}>
 
@@ -298,11 +303,25 @@ export default function Finder({
                                     <button onClick={() => handleItemClick(contextMenu.targetItem!)} className={`w-full text-left px-3 py-2 ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}>
                                         {contextMenu.targetItem.type === 'FOLDER' ? 'Open Folder' : 'Select File'}
                                     </button>
+                                    <div className={`h-px my-1 ${isDark ? 'bg-zinc-800' : 'bg-gray-100'}`} />
                                     {onDownloadFile && (
                                         <button onClick={() => onDownloadFile(contextMenu.targetItem!)} className={`w-full text-left px-3 py-2 ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}>
                                             Download
                                         </button>
                                     )}
+                                    <div className={`h-px my-1 ${isDark ? 'bg-zinc-800' : 'bg-gray-100'}`} />
+                                    {onRenameNode && (
+                                        <button
+                                            onClick={() => {
+                                                setRenameTarget(contextMenu.targetItem);
+                                                setContextMenu(prev => prev ? { ...prev, visible: false } : null);
+                                            }}
+                                            className={`w-full text-left px-3 py-2 ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}
+                                        >
+                                            Rename
+                                        </button>
+                                    )}
+
                                     <div className={`h-px my-1 ${isDark ? 'bg-zinc-800' : 'bg-gray-100'}`} />
                                     {onDeleteNode && (
                                         <button onClick={() => onDeleteNode(contextMenu.targetItem!.id)} className="w-full text-left px-3 py-2 text-red-500 hover:bg-red-500/10 transition-colors">
@@ -310,6 +329,7 @@ export default function Finder({
                                         </button>
                                     )}
                                 </>
+
                             )}
                         </>
                     ) : (
@@ -323,6 +343,19 @@ export default function Finder({
                     )}
                 </div>
             )}
+
         </div>
+            {onRenameNode && (
+                <RenameModalWindow
+                    isOpen={!!renameTarget}
+                    currentName={renameTarget?.name ?? ""}
+                    onConfirm={(newName) => {
+                        onRenameNode(renameTarget!.id, newName);
+                        setRenameTarget(null);
+                    }}
+                    closeModal={() => setRenameTarget(null)}
+                />
+            )}
+    </>
     );
 }
