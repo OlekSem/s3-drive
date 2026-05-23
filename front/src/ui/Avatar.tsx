@@ -1,12 +1,12 @@
-import {CgProfile} from "react-icons/cg";
-import {useTheme} from "../hooks/useTheme.ts";
-import {useEffect, useRef, useState} from "react";
+import { CgProfile } from "react-icons/cg";
+import { useTheme } from "../hooks/useTheme.ts";
+import { useEffect, useRef, useState } from "react";
 import useModal from "../hooks/useModal.ts";
 import RegisterModalWindow from "./RegisterModalWindow.tsx";
 import LoginModalWindow from "./LoginModalWindow.tsx";
-import {useAppDispatch, useAppSelector} from "../hooks/redux.ts";
-import {logout} from "../store/reducers/AuthSlice.ts";
-
+import { useAppDispatch, useAppSelector } from "../hooks/redux.ts";
+import { logout } from "../store/reducers/AuthSlice.ts";
+import API_ENV from "../env";
 
 const Avatar = () => {
     const { theme } = useTheme();
@@ -14,27 +14,19 @@ const Avatar = () => {
     const menuRef = useRef<HTMLDivElement | null>(null);
 
     const dispatch = useAppDispatch();
-    // 1. Pull the real-time user auth status from your Redux state
     const user = useAppSelector((state) => state.authReducer.user);
 
-    const registerModal= useModal();
-    const loginModal= useModal();
+    const registerModal = useModal();
+    const loginModal = useModal();
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (
-                menuRef.current &&
-                !menuRef.current.contains(event.target as Node)
-            ) {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
                 setOpen(false);
             }
-
         };
         document.addEventListener("mousedown", handleClickOutside);
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-
+        return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
     const handleLogout = () => {
@@ -44,6 +36,7 @@ const Avatar = () => {
 
     return (
         <div className="relative" ref={menuRef}>
+            {/* Базовий контейнер один для всіх випадків */}
             <div
                 onClick={() => setOpen(!open)}
                 className="
@@ -53,13 +46,25 @@ const Avatar = () => {
                     flex items-center justify-center
                     hover:cursor-pointer
                     transition hover:brightness-110
+                    overflow-hidden
                 "
             >
-                <CgProfile
-                    className="w-8 h-8"
-                    color={theme === "light" ? "white" : "black"}
-                />
+                {/* Змінюється тільки те, що всередині круглого контейнера */}
+                {user?.image ? (
+                    <img
+                        src={`${API_ENV.API_BASE_URL}/small/${user.image}`}
+                        alt={user.username || "logo"}
+                        className="w-full h-full object-cover"
+                    />
+                ) : (
+                    <CgProfile
+                        className="w-8 h-8"
+                        color={theme === "light" ? "white" : "black"}
+                    />
+                )}
             </div>
+
+            {/* Випадаюче меню */}
             {open && (
                 <div
                     className="
@@ -70,21 +75,13 @@ const Avatar = () => {
                         p-2 z-50
                     "
                 >
-                    {/* 2. Check if user exists to render appropriate actions */}
                     {user ? (
                         <>
                             <div className="px-3 py-1.5 text-xs text-gray-400 border-b border-[var(--border-color)] mb-1 truncate">
                                 {user.username}
                             </div>
                             <button
-                                className="
-                                    w-full text-left
-                                    px-3 py-2 rounded-lg
-                                    hover:bg-red-500/10
-                                    text-red-500 font-medium
-                                    transition
-                                    hover:cursor-pointer
-                                "
+                                className="w-full text-left px-3 py-2 rounded-lg hover:bg-red-500/10 text-red-500 font-medium transition hover:cursor-pointer"
                                 onClick={handleLogout}
                             >
                                 Вийти
@@ -93,13 +90,7 @@ const Avatar = () => {
                     ) : (
                         <>
                             <button
-                                className="
-                                    w-full text-left
-                                    px-3 py-2 rounded-lg
-                                    hover:bg-[var(--hover-bg)]
-                                    transition
-                                    hover:cursor-pointer
-                                "
+                                className="w-full text-left px-3 py-2 rounded-lg hover:bg-[var(--hover-bg)] transition hover:cursor-pointer"
                                 onClick={() => {
                                     loginModal.openModal();
                                     setOpen(false);
@@ -108,13 +99,7 @@ const Avatar = () => {
                                 Log in
                             </button>
                             <button
-                                className="
-                                    w-full text-left
-                                    px-3 py-2 rounded-lg
-                                    hover:bg-[var(--hover-bg)]
-                                    transition
-                                    hover:cursor-pointer
-                                "
+                                className="w-full text-left px-3 py-2 rounded-lg hover:bg-[var(--hover-bg)] transition hover:cursor-pointer"
                                 onClick={() => {
                                     registerModal.openModal();
                                     setOpen(false);
@@ -122,15 +107,7 @@ const Avatar = () => {
                             >
                                 Sign up
                             </button>
-                            <button
-                                className="
-                                    w-full text-left
-                                    px-3 py-2 rounded-lg
-                                    hover:bg-[var(--hover-bg)]
-                                    transition
-                                    hover:cursor-pointer
-                                "
-                            >
+                            <button className="w-full text-left px-3 py-2 rounded-lg hover:bg-[var(--hover-bg)] transition hover:cursor-pointer">
                                 Google
                             </button>
                         </>

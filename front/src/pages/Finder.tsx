@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect, useRef } from 'react';
-import { Link, useSearchParams } from "react-router-dom";
+import {Link, useSearchParams} from "react-router-dom";
 import {
     X, Folder, File, ChevronRight, FileText, Calendar,
     HardDriveDownload, ArrowLeft, RefreshCw, Check, Trash2
@@ -8,6 +8,7 @@ import { ThemeContext } from '../context/ThemeContext.ts';
 import type { INodeResponse } from "../interfaces.ts";
 import API_ENV from "../env";
 import RenameModalWindow from "../ui/RenameModalWindow.tsx";
+import PreviewModal from "./PreviewModal.tsx";
 import {fileStorageApi} from "../service/FileStorageService.ts";
 
 export type NodeType = 'FILE' | 'FOLDER';
@@ -15,7 +16,7 @@ export type NodeType = 'FILE' | 'FOLDER';
 interface FinderProps {
     nodes: INodeResponse[];
     isLoading?: boolean;
-    error?: any;
+    error?: never;
     rootFolderName?: string;
     mode?: 'drive' | 'trash';
     onCreateFolder?: (parentId: number | null) => Promise<void> | void;
@@ -29,18 +30,16 @@ interface FinderProps {
 
 export default function Finder({
                                    nodes = [],
-                                   isLoading = false,
-                                   error = null,
                                    rootFolderName = "Cloud Space",
-                                   mode = 'drive', // За замовчуванням це звичайний диск
+                                   mode = 'drive',
                                    onCreateFolder,
                                    onDeleteNode,
                                    onDeletePermanently,
                                    onRestoreNode,
-                                   onDownloadFile,
                                    onRenameNode,
                                    onUploadClick
                                }: FinderProps) {
+    const [previewTarget, setPreviewTarget] = useState<INodeResponse | null>(null);
     const inspectorRef = useRef<HTMLDivElement>(null);
     const [searchParams, setSearchParams] = useSearchParams();
     const folderParam = searchParams.get('id');
@@ -63,19 +62,23 @@ export default function Finder({
 
     const selectedCount = Object.keys(selectedIds).filter(id => selectedIds[parseInt(id, 10)]).length;
 
+    // Закриття контекстного меню при кліку будь-де лівою кнопкою миші
     useEffect(() => {
         const handleWindowClick = (e: MouseEvent) => {
+            if (e.button !== 0) return; // Реагуємо тільки на ліву кнопку миші
             const clickedInsideMenu = (e.target as HTMLElement).closest('.context-menu-wrapper');
-            if (clickedInsideMenu) return;
-            setContextMenu(null);
+            if (!clickedInsideMenu) {
+                setContextMenu(null);
+            }
         };
 
         if (contextMenu?.visible) {
-            window.addEventListener('click', handleWindowClick);
+            window.addEventListener('mousedown', handleWindowClick);
         }
-        return () => window.removeEventListener('click', handleWindowClick);
+        return () => window.removeEventListener('mousedown', handleWindowClick);
     }, [contextMenu?.visible]);
 
+    // Скидання виділення при кліку на порожнє місце
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (inspectorRef.current && inspectorRef.current.contains(event.target as Node)) return;
@@ -223,6 +226,14 @@ export default function Finder({
         }
     };
 
+    const handleItemDoubleClick = (item: INodeResponse) => {
+        if (item.type === 'FOLDER') {
+            navigateToFolder(item.id);
+        } else {
+            setPreviewTarget(item);
+        }
+    };
+
     const getTargetIds = (targetItem: INodeResponse | null): number[] => {
         const currentSelected = Object.keys(selectedIds)
             .map(id => parseInt(id, 10))
@@ -244,16 +255,17 @@ export default function Finder({
         return `${(kib / 1024).toFixed(1)} MB`;
     };
 
-    if (isLoading) return <div className="p-6 text-center font-medium text-sm">Loading Files...</div>;
-    if (error) return <div className="p-6 text-center text-red-500 font-medium text-sm">Error loading files.</div>;
+    // if (isLoading) return <div className="p-6 text-center font-medium text-sm">Loading Files...</div>;
+    // if (error) return <div className="p-6 text-center text-red-500 font-medium text-sm">Error loading files.</div>;
 
     const activeItems = getCurrentItems();
     const breadcrumbs = getBreadcrumbs();
 
     return (
         <>
+            {/* h-full та min-h-[600px] замість жорсткого h-[580px] розширюють вікно */}
             <div onContextMenu={(e) => handleContextMenu(e, null)}
-                 className={`flex w-full h-[580px] font-sans rounded-xl overflow-hidden shadow-2xl border transition-colors duration-200 ${colors.bg}`}>
+                 className={`flex w-full min-h-[640px] h-full font-sans rounded-xl overflow-hidden shadow-2xl border transition-colors duration-200 ${colors.bg}`}>
 
                 <div className={`flex-1 flex flex-col min-w-0 ${colors.body}`}>
                     {/* ХЛІБНІ КРИХТИ */}
@@ -302,7 +314,8 @@ export default function Finder({
                                     <div
                                         key={item.id}
                                         onContextMenu={(e) => handleContextMenu(e, item)}
-                                        onClick={() => handleItemClick(item)}
+                                        // onClick={() => handleItemClick(item)}
+                                        onDoubleClick={() => handleItemDoubleClick(item)}
                                         className={`flex flex-col items-center p-3 rounded-xl cursor-pointer transition-all duration-150 group select-none finder-node-item relative ${
                                             isItemChecked ? 'bg-blue-500/20 ring-2 ring-blue-500' : colors.itemHover
                                         }`}
@@ -394,9 +407,9 @@ export default function Finder({
                 {contextMenu && contextMenu.visible && (
                     <div
                         style={{ top: contextMenu.y, left: contextMenu.x }}
-                        className={`fixed z-50 w-52 py-1 rounded-lg shadow-xl border text-xs select-none backdrop-blur-md context-menu-wrapper ${
-                            isDark ? 'bg-[#1b1b22]/95 border-[#2c2c3a] text-gray-200' : 'bg-white/95 border-gray-200 text-gray-800'
-                        }`}
+                        className={`${contextMenu.targetItem ? 'fixed z-50 w-52 py-1 rounded-lg shadow-xl border text-xs select-none backdrop-blur-md context-menu-wrapper ${isDark ? \'bg-[#1b1b22]/95 border-[#2c2c3a] text-gray-200\' : \'bg-white/95 border-gray-200 text-gray-800\'}' : (mode==="trash" ? 'none' : 'fixed z-50 w-52 py-1 rounded-lg shadow-xl border text-xs select-none backdrop-blur-md context-menu-wrapper ${isDark ? \'bg-[#1b1b22]/95 border-[#2c2c3a] text-gray-200\' : \'bg-white/95 border-gray-200 text-gray-800\'}')}
+                        
+                        `}
                     >
                         {contextMenu.targetItem ? (
                             <>
@@ -404,40 +417,43 @@ export default function Finder({
                                     {selectedCount > 1 ? `Selected ${selectedCount} items` : contextMenu.targetItem.name}
                                 </div>
 
-                            {/* Якщо ми в СМІТНИКУ */}
-                            {mode === 'trash' ? (
-                                <>
-                                    {onRestoreNode && (
+                                {mode === 'trash' ? (
+                                    <>
+                                        {onRestoreNode && (
+                                            <button
+                                                onClick={() => restore(contextMenu.targetItem!.id)}
+                                                className={`w-full text-left px-3 py-2 flex items-center gap-2 transition-colors ${isDark ? 'hover:bg-blue-600/30 text-blue-400' : 'hover:bg-blue-50 text-blue-600'}`}
+                                            >
+                                                <RefreshCw size={12} /> Restore Item
+                                            </button>
+                                        )}
+                                        <div className={`h-px my-1 ${isDark ? 'bg-zinc-800' : 'bg-gray-100'}`} />
+                                        {onDeletePermanently && (
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    const ids = getTargetIds(contextMenu.targetItem);
+                                                    onDeletePermanently(ids);
+                                                    setSelectedIds({});
+                                                    setContextMenu(null);
+                                                }}
+                                                className="w-full text-left px-3 py-2 text-red-500 font-semibold hover:bg-red-500/10 transition-colors"
+                                            >
+                                                {selectedCount > 1 ? `Delete ${selectedCount} items permanently` : 'Delete permanently'}
+                                            </button>
+                                        )}
+                                    </>
+                                ) : (
+                                    <>
                                         <button
-                                            onClick={() => restore(contextMenu.targetItem!.id)}
-                                            className={`w-full text-left px-3 py-2 flex items-center gap-2 transition-colors ${isDark ? 'hover:bg-blue-600/30 text-blue-400' : 'hover:bg-blue-50 text-blue-600'}`}
-                                        >
-                                            <RefreshCw size={12} /> Restore Item
-                                        </button>
-                                    )}
-                                    <div className={`h-px my-1 ${isDark ? 'bg-zinc-800' : 'bg-gray-100'}`} />
-                                    {onDeletePermanently && (
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                const ids = getTargetIds(contextMenu.targetItem);
-                                                onDeletePermanently(ids);
-                                                setSelectedIds({});
+                                            onClick={() => {
+                                                // handleItemClick(contextMenu.targetItem!);
                                                 setContextMenu(null);
                                             }}
-                                            className="w-full text-left px-3 py-2 text-red-500 font-semibold hover:bg-red-500/10 transition-colors"
+                                            className={`w-full text-left px-3 py-2 text-xs font-medium ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}
                                         >
-                                            {selectedCount > 1 ? `Delete ${selectedCount} items permanently` : 'Delete permanently'}
+                                            {contextMenu.targetItem.type === 'FOLDER' ? 'Open Folder' : 'Select File'}
                                         </button>
-                                    )}
-                                </>
-                            ) : (
-                                /* Якщо ми на звичайному ДИСКУ */
-                                <>
-                                    <button onClick={() => handleItemClick(contextMenu.targetItem!)}
-                                            className={`w-full text-left px-3 py-2 text-xs font-medium ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}>
-                                        {contextMenu.targetItem!.type === 'FOLDER' ? 'Open Folder' : 'Select File'}
-                                    </button>
 
                                         {contextMenu.targetItem.type === 'FILE' && (
                                             <button
@@ -451,7 +467,19 @@ export default function Finder({
                                             >
                                                 {isDownloading ? "Downloading..." : "Download"}
                                             </button>
-                                        )}
+                                        )
+                                        &&
+                                            <button
+                                                onClick={() => {
+                                                    handleItemClick(contextMenu.targetItem!);
+                                                    setContextMenu(null);
+                                                }}
+                                                disabled={isDownloading}
+                                                className={`w-full text-left px-3 py-2 text-xs font-medium ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'} disabled:opacity-50`}
+                                            >
+                                                Get Info
+                                            </button>
+                                        }
 
                                         <div className={`h-px my-1 ${isDark ? 'bg-zinc-800' : 'bg-gray-100'}`} />
 
@@ -509,6 +537,13 @@ export default function Finder({
                 )}
             </div>
 
+            {/* Модалка прев'ю викликається тут, окремо від дерева умов контекстного меню */}
+            <PreviewModal
+                isOpen={!!previewTarget}
+                file={previewTarget}
+                onClose={() => setPreviewTarget(null)}
+            />
+
             {onRenameNode && (
                 <RenameModalWindow
                     isOpen={!!renameTarget}
@@ -517,6 +552,7 @@ export default function Finder({
                         await onRenameNode(renameTarget!.id, newName);
                         setRenameTarget(null);
                     }}
+
                     closeModal={() => setRenameTarget(null)}
                 />
             )}

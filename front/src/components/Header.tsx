@@ -1,6 +1,6 @@
 import Avatar from "../ui/Avatar.tsx";
 import ThemeSwitch from "../ui/ThemeSwitch.tsx";
-import Search from "../ui/Search";
+
 import UploadButton from "../ui/UploadButton";
 
 
@@ -15,7 +15,7 @@ const Header = () => {
          border-[var(--border)]
          ">
             <ThemeSwitch />
-            <Search />
+            {/*<Search />*/}
             <UploadButton />
             <Avatar />
         </div>
