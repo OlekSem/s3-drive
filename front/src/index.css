@@ -15,6 +15,7 @@
     --avatar-bg: #1A1A18;
     --hover-bg: #F0EEE8;
     --avatar-menu: #FFFFFF;
+    --label: #F0EEE8;
 }
 
 .dark {
@@ -30,4 +31,5 @@
     --avatar-bg: #F0EEE8;
     --hover-bg: #2C2C2A;
     --avatar-menu: #1A1A18;
+    --label: #2C2C2A;
 }

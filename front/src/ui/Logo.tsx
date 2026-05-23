@@ -2,7 +2,7 @@
 
 const Logo = () => {
     return (
-        <div className="flex flex-row items-center gap-2 ">
+        <div className="flex flex-row items-center gap-2 hover:cursor-pointer ">
             <div
                 className="bg-[var(--logo-text)] w-9 h-9
                  flex items-center justify-center
