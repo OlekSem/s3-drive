@@ -1,21 +1,17 @@
 import Logo from "../ui/Logo.tsx";
 
-
-
 const Navbar = () => {
     return (
         <div
             className="flex flex-col
             justify-between
             bg-[var(--surface)]
-            w-[25%] p-6 border-r-2 border-[var(--border)]
-            h-screen
-            ">
+            w-64 flex-shrink-0 p-6 border-r-2 border-[var(--border)]
+            h-screen sticky top-0
+            "
+        >
             <Logo />
-            {/*<div*/}
-            {/*    className="mt-6 flex flex-col gap-4">*/}
-
-            {/*</div>*/}
+            {/*<div className="mt-6 flex flex-col gap-4"></div>*/}
         </div>
     );
 };
