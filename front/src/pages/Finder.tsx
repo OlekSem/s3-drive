@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { useSearchParams } from "react-router-dom";
-import { Folder, File, Trash2, ChevronRight, FileText, Calendar, HardDriveDownload, ArrowLeft, RefreshCw } from 'lucide-react';
+import { Folder, File, ChevronRight, FileText, Calendar, HardDriveDownload, ArrowLeft, RefreshCw } from 'lucide-react';
 import { ThemeContext } from '../context/ThemeContext.ts';
 import type {INodeResponse} from "../interfaces.ts";
 
