@@ -5,6 +5,7 @@ import {ThemeContext} from '../context/ThemeContext.ts';
 import type {INodeResponse} from "../interfaces.ts";
 import API_ENV from "../env";
 import RenameModalWindow from "../ui/RenameModalWindow.tsx";
+import {fileStorageApi} from "../service/FileStorageService.ts";
 
 export type NodeType = 'FILE' | 'FOLDER';
 
@@ -162,6 +163,8 @@ export default function Finder({
         }
     };
 
+    const [restore] = fileStorageApi.useRestoreNodeMutation()
+
     const formatBytes = (bytes: number | null) => {
         if (bytes === null) return '--';
         if (bytes < 1024) return `${bytes} B`;
@@ -311,7 +314,7 @@ export default function Finder({
                                 <>
                                     {onRestoreNode && (
                                         <button
-                                            onClick={() => onRestoreNode!(contextMenu.targetItem!.id)}
+                                            onClick={() => restore(contextMenu.targetItem!.id)}
                                             className={`w-full text-left px-3 py-2 flex items-center gap-2 transition-colors ${isDark ? 'hover:bg-blue-600/30 text-blue-400' : 'hover:bg-blue-50 text-blue-600'}`}
                                         >
                                             <RefreshCw size={12} /> Restore Item

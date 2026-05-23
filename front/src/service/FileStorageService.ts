@@ -84,6 +84,18 @@ export const fileStorageApi = createApi({
             providesTags: [{ type: "Node", id: "TRASH" }],
         }),
 
+        restoreNode: builder.mutation<void, number>({
+            query: (id) => ({
+                url: `/nodes/restore/${id}`,
+                method: 'PATCH',
+            }),
+            invalidatesTags: [
+                { type: "Node", id: "LIST" },
+                { type: "Node", id: "TRASH" },
+                { type: "Folder", id: "LIST" }
+            ],
+        }),
+
         softDeleteNode: builder.mutation<void, number>({
             query: (nodeId) => ({
                 url: "/nodes/SoftDelete",
@@ -96,6 +108,8 @@ export const fileStorageApi = createApi({
                 { type: "Folder", id: "LIST" }
             ],
         }),
+
+
 
         deleteNodePermanently: builder.mutation<void, { folderId?: number }>({
             query: ({ folderId }) => ({
