@@ -417,18 +417,16 @@ export default function Finder({
                             {/* Якщо ми в СМІТНИКУ */}
                             {mode === 'trash' ? (
                                 <>
-                                    {onRestoreNode && (
-                                        <button
-                                            onClick={() =>{
-                                                restore(getTargetIds(contextMenu.targetItem))
-                                                setSelectedIds({});
-                                                setContextMenu(null);
-                                            } }
-                                            className={`w-full text-left px-3 py-2 flex items-center gap-2 transition-colors ${isDark ? 'hover:bg-blue-600/30 text-blue-400' : 'hover:bg-blue-50 text-blue-600'}`}
-                                        >
-                                            <RefreshCw size={12} /> Restore Item
-                                        </button>
-                                    )}
+                                    <button
+                                        onClick={() => {
+                                            restore(getTargetIds(contextMenu.targetItem));
+                                            setSelectedIds({});
+                                            setContextMenu(null);
+                                        }}
+                                        className={`w-full text-left px-3 py-2 flex items-center gap-2 transition-colors ${isDark ? 'hover:bg-blue-600/30 text-blue-400' : 'hover:bg-blue-50 text-blue-600'}`}
+                                    >
+                                        <RefreshCw size={12} /> Restore Item
+                                    </button>
                                     <div className={`h-px my-1 ${isDark ? 'bg-zinc-800' : 'bg-gray-100'}`} />
                                     {onDeletePermanently && (
                                         <button
