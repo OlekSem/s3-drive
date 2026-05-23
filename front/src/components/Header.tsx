@@ -1,11 +1,12 @@
-
 import Avatar from "../ui/Avatar.tsx";
 import ThemeSwitch from "../ui/ThemeSwitch.tsx";
 import Search from "../ui/Search";
 import UploadButton from "../ui/UploadButton";
 
 
+
 const Header = () => {
+
     return (
         <div className="
          bg-[var(--surface)] w-[100%]

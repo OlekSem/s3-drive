@@ -37,7 +37,7 @@ const Home = () => {
                     </p>
                     <p className="text-xs text-gray-400">
                         Щоб розпочати роботу з файловим менеджером, будь ласка, скористайтеся кнопкою
-                        <span className="text-blue-400 font-semibold mx-1">Log in</span>
+                        <span className="text-blue-400 font-semibold mx-1">Sign up</span>
                         у верхньому правому кутку профілю.
                     </p>
                 </div>

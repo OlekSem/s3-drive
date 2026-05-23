@@ -1,7 +1,7 @@
-import React, { useState, useContext, useEffect } from 'react';
-import { useSearchParams } from "react-router-dom";
-import { Folder, File, ChevronRight, FileText, Calendar, HardDriveDownload, ArrowLeft, RefreshCw } from 'lucide-react';
-import { ThemeContext } from '../context/ThemeContext.ts';
+import React, {useState, useContext, useEffect} from 'react';
+import {Link, useSearchParams} from "react-router-dom";
+import {Folder, File, ChevronRight, FileText, Calendar, HardDriveDownload, ArrowLeft, RefreshCw} from 'lucide-react';
+import {ThemeContext} from '../context/ThemeContext.ts';
 import type {INodeResponse} from "../interfaces.ts";
 import RenameModalWindow from "../ui/RenameModalWindow.tsx";
 
@@ -66,7 +66,7 @@ export default function Finder({
 
     useEffect(() => {
         const closeMenu = () => {
-            if (contextMenu?.visible) setContextMenu(prev => prev ? { ...prev, visible: false } : null);
+            if (contextMenu?.visible) setContextMenu(prev => prev ? {...prev, visible: false} : null);
         };
         window.addEventListener('click', closeMenu);
         return () => window.removeEventListener('click', closeMenu);
@@ -75,7 +75,7 @@ export default function Finder({
     const handleContextMenu = (e: React.MouseEvent, item: INodeResponse | null) => {
         e.preventDefault();
         e.stopPropagation();
-        setContextMenu({ x: e.clientX, y: e.clientY, visible: true, targetItem: item });
+        setContextMenu({x: e.clientX, y: e.clientY, visible: true, targetItem: item});
     };
 
     const colors = {
@@ -323,8 +323,10 @@ export default function Finder({
                                     )}
 
                                     <div className={`h-px my-1 ${isDark ? 'bg-zinc-800' : 'bg-gray-100'}`} />
+                                    <div className={`h-px my-1 ${isDark ? 'bg-zinc-800' : 'bg-gray-100'}`}/>
                                     {onDeleteNode && (
-                                        <button onClick={() => onDeleteNode(contextMenu.targetItem!.id)} className="w-full text-left px-3 py-2 text-red-500 hover:bg-red-500/10 transition-colors">
+                                        <button onClick={() => onDeleteNode(contextMenu.targetItem!.id)}
+                                                className="w-full text-left px-3 py-2 text-red-500 hover:bg-red-500/10 transition-colors">
                                             Move to Trash
                                         </button>
                                     )}
@@ -336,8 +338,21 @@ export default function Finder({
                         /* Натискання на порожнє місце (показуємо створення тільки на диску) */
                         mode === 'drive' && (
                             <>
-                                {onCreateFolder && <button onClick={() => onCreateFolder(currentFolderId)} className={`w-full text-left px-3 py-2 ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}>New Folder</button>}
-                                {onUploadClick && <button onClick={() => onUploadClick(currentFolderId)} className={`w-full text-left px-3 py-2 ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}>Upload Files Here</button>}
+                                {onCreateFolder && <button onClick={() => onCreateFolder(currentFolderId)}
+														   className={`w-full text-left px-3 py-2 ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}>New
+									Folder</button>}
+                                {onUploadClick && <button onClick={() =>
+                                    // onUploadClick(currentFolderId)
+                                    {}
+                                }
+														  className={`w-full text-left px-3 py-2 ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}>
+									<Link
+										to={{pathname: "/upload", search: `?${searchParams.toString()}`}}
+										// className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm flex items-center gap-2"
+									>
+										Upload Files Here
+									</Link>
+								</button>}
                             </>
                         )
                     )}

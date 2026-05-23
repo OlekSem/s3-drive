@@ -50,7 +50,7 @@ export const fileStorageApi = createApi({
                 params: parentId ? { parentId } : {},
                 body: formData,
             }),
-            invalidatesTags: [{ type: "File", id: "LIST" }, { type: "Node", id: "LIST" }],
+            invalidatesTags: [{ type: "File", id: "LIST" }, { type: "Node", id: "LIST" }, { type: "Folder", id: "LIST" }],
         }),
 
         downloadFile: builder.query<Blob, number>({
