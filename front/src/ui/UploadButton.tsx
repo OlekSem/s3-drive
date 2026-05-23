@@ -12,7 +12,7 @@ const UploadButton = () => {
             
             `}
             >
-                Upload</button>
+                <a href={"/upload"}>Upload</a></button>
         </div>
     );
 };

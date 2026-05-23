@@ -1,9 +1,11 @@
 import {combineReducers, configureStore} from "@reduxjs/toolkit";
 import {authService} from "../service/AuthService.ts";
 import authReducer from "../store/reducers/AuthSlice.ts";
+import {fileStorageApi} from "../service/FileStorageService.ts";
 
 const rootReducer = combineReducers({
     [authService.reducerPath]: authService.reducer,
+    [fileStorageApi.reducerPath]: fileStorageApi.reducer,
     authReducer,
 })
 
@@ -13,6 +15,7 @@ export const setupStore = () => {
         middleware: (getDefaultMiddleware) =>
             getDefaultMiddleware().concat(
                 authService.middleware,
+                fileStorageApi.middleware,
             ),
     })
 }

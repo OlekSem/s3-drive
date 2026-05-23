@@ -46,3 +46,5 @@ export const authService = createApi({
 
     })
 })
+
+export const { useRegisterMutation, useLoginMutation } = authService;

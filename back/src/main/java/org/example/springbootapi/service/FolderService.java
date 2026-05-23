@@ -44,7 +44,7 @@ public class FolderService {
             }
         }
 
-        boolean nameExists = nodeRepository.existsByParentAndNameAndOwner(
+        boolean nameExists = nodeRepository.existsByParentAndNameAndOwnerAndTrashIsFalse(
                 parent,
                 defaultName,
                 user
@@ -65,6 +65,7 @@ public class FolderService {
                 .build();
         return nodeRepository.save(folder);
     }
+
 
     @Transactional
     public List<NodeResponseDto> view(Long folderId, User user) {

@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 
 import io.swagger.v3.oas.annotations.media.Content;
 
+import org.example.springbootapi.dto.FileUploadResponseDto;
 import org.springframework.web.bind.annotation.RequestBody;
 import jakarta.validation.Valid;
 import org.example.springbootapi.dto.node.RenameNodeRequestDto;
@@ -44,12 +45,21 @@ public class FileController {
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file,
-                                             @AuthenticationPrincipal User user,
-                                             @RequestParam(required = false) Long parentId)
+    public ResponseEntity<FileUploadResponseDto> uploadFile(
+            @RequestParam("file") MultipartFile file,
+            @AuthenticationPrincipal User user,
+            @RequestParam(required = false) Long parentId)
     {
         Node node = fileService.upload(file, user, parentId);
-        return ResponseEntity.ok(node.getName() + " --- " + node.getStorageKey());
+
+        // Returns structured JSON: {"name": "...", "storageKey": "...", "id": ...}
+        FileUploadResponseDto response = new FileUploadResponseDto(
+                node.getName(),
+                node.getStorageKey(),
+                node.getId()
+        );
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/download/{id}")
