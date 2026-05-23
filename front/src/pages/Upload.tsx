@@ -7,7 +7,7 @@ const Upload = () => {
     const navigate = useNavigate();
 
     // Get the current folder directory parent context if available (defaults to root if missing)
-    const parentIdParam = searchParams.get("parentId");
+    const parentIdParam = searchParams.get("id");
     const parentId = parentIdParam ? parseInt(parentIdParam, 10) : undefined;
 
     // RTK Query file service mutation hook
@@ -32,7 +32,7 @@ const Upload = () => {
 
             // Redirect back to folder view context after a brief success confirmation delay
             setTimeout(() => {
-                navigate(parentId ? `/?folderId=${parentId}` : "/");
+                navigate(parentId ? `/folder?id=${parentId}` : "/folder");
             }, 1500);
         } catch (err) {
             console.error("Помилка під час завантаження файла:", err);

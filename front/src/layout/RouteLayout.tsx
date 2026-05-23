@@ -8,22 +8,17 @@ import Folder from "../pages/Folder.tsx";
 import Trash from "../pages/Trash.tsx";
 
 export const RouteLayout = () => {
-    // const pages = [
-    //     // { path: "/cities", element: <Cities /> },
-    //
-    // ] as const;
-
     return (
         <BrowserRouter>
             <Routes>
                 <Route path='/' element={<MainLayout />}>
                     {/* Public Routes */}
                     <Route index element={<Home />} />
-                    <Route path="/folder" element={<Folder />} />
-                    <Route path="/trash" element={<Trash />} />
 
                     {/* Protected Routes Block */}
                     <Route element={<ProtectedRoute redirectPath="/" />}>
+                        <Route path="/folder" element={<Folder />} />
+                        <Route path="/trash" element={<Trash />} />
                         <Route path='upload' element={<Upload />} />
                         {/* You can drop any other private routes here easily */}
                     </Route>

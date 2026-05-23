@@ -1,24 +1,12 @@
-import React, { useState, useContext, useEffect } from 'react';
-import { useSearchParams } from "react-router-dom";
-import { Folder, File, ChevronRight, FileText, Calendar, HardDriveDownload, ArrowLeft, RefreshCw } from 'lucide-react';
-import { ThemeContext } from '../context/ThemeContext.ts';
+import React, {useState, useContext, useEffect} from 'react';
+import {Link, useSearchParams} from "react-router-dom";
+import {Folder, File, ChevronRight, FileText, Calendar, HardDriveDownload, ArrowLeft, RefreshCw} from 'lucide-react';
+import {ThemeContext} from '../context/ThemeContext.ts';
 import type {INodeResponse} from "../interfaces.ts";
+import API_ENV from "../env";
 import RenameModalWindow from "../ui/RenameModalWindow.tsx";
 
 export type NodeType = 'FILE' | 'FOLDER';
-//
-// export interface NodeResponseDto {
-//     id: number;
-//     name: string;
-//     type: NodeType;
-//     size: number | null;
-//     mimeType: string | null;
-//     storageKey: string | null;
-//     userId: number;
-//     parentId: number | null;
-//     createdAt: string;
-//     updatedAt: string;
-// }
 
 interface FinderProps {
     nodes: INodeResponse[];
@@ -56,6 +44,7 @@ export default function Finder({
     const [selectedFile, setSelectedFile] = useState<INodeResponse | null>(null);
     const themeContext = useContext(ThemeContext);
     const isDark = themeContext?.theme === 'dark';
+    const [isDownloading, setIsDownloading] = useState(false);
 
     const [contextMenu, setContextMenu] = useState<{
         x: number;
@@ -66,7 +55,7 @@ export default function Finder({
 
     useEffect(() => {
         const closeMenu = () => {
-            if (contextMenu?.visible) setContextMenu(prev => prev ? { ...prev, visible: false } : null);
+            if (contextMenu?.visible) setContextMenu(prev => prev ? {...prev, visible: false} : null);
         };
         window.addEventListener('click', closeMenu);
         return () => window.removeEventListener('click', closeMenu);
@@ -75,8 +64,49 @@ export default function Finder({
     const handleContextMenu = (e: React.MouseEvent, item: INodeResponse | null) => {
         e.preventDefault();
         e.stopPropagation();
-        setContextMenu({ x: e.clientX, y: e.clientY, visible: true, targetItem: item });
+        setContextMenu({x: e.clientX, y: e.clientY, visible: true, targetItem: item});
     };
+
+    const handleDownload = async (file: INodeResponse) => {
+        try {
+            setIsDownloading(true);
+            // 1. Fetch the data directly from your backend endpoint
+            const token = localStorage.getItem("token");
+            const response = await fetch(`${API_ENV.API_BASE_URL}/api/files/download/${file.id}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': token ? `Bearer ${token}` : ''
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Server responded with status: ${response.status}`);
+            }
+
+            // 2. Extract the file as a raw blob stream directly into browser memory
+            const blobData = await response.blob();
+
+            // 3. Create a temporary local object pointer URL
+            const downloadUrl = window.URL.createObjectURL(blobData);
+
+            // 4. Trigger the native browser save file dialog box
+            const anchorLink = document.createElement('a');
+            anchorLink.href = downloadUrl;
+            anchorLink.download = file.name; // Preserves your filename extension
+            document.body.appendChild(anchorLink);
+            anchorLink.click();
+
+            // 5. Instantly clean up DOM nodes and release the file memory stream
+            document.body.removeChild(anchorLink);
+            window.URL.revokeObjectURL(downloadUrl);
+
+        } catch (err) {
+            console.error("Failed to download file directly:", err);
+        } finally {
+            setIsDownloading(false);
+        }
+    };
+
 
     const colors = {
         bg: isDark ? 'bg-[#1e1e24] border-[#2a2a35] text-[#f5f5f7]' : 'bg-white border-gray-200 text-gray-900',
@@ -300,13 +330,23 @@ export default function Finder({
                             ) : (
                                 /* Якщо ми на звичайному ДИСКУ */
                                 <>
-                                    <button onClick={() => handleItemClick(contextMenu.targetItem!)} className={`w-full text-left px-3 py-2 ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}>
-                                        {contextMenu.targetItem.type === 'FOLDER' ? 'Open Folder' : 'Select File'}
+                                    <button onClick={() => handleItemClick(contextMenu.targetItem!)}
+                                            className={`w-full text-left px-3 py-2 text-xs font-medium ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}>
+                                        {contextMenu.targetItem!.type === 'FOLDER' ? 'Open Folder' : 'Select File'}
                                     </button>
-                                    <div className={`h-px my-1 ${isDark ? 'bg-zinc-800' : 'bg-gray-100'}`} />
-                                    {onDownloadFile && (
-                                        <button onClick={() => onDownloadFile(contextMenu.targetItem!)} className={`w-full text-left px-3 py-2 ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}>
-                                            Download
+
+                                    {/* UPDATED DOWNLOAD BUTTON */}
+                                    {contextMenu.targetItem!.type === 'FILE' && (
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleDownload(contextMenu.targetItem!);
+                                                setContextMenu(prev => prev ? { ...prev, visible: false } : null);
+                                            }}
+                                            disabled={isDownloading}
+                                            className={`w-full text-left px-3 py-2 text-xs font-medium ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'} disabled:opacity-50`}
+                                        >
+                                            {isDownloading ? "Downloading..." : "Download"}
                                         </button>
                                     )}
                                     <div className={`h-px my-1 ${isDark ? 'bg-zinc-800' : 'bg-gray-100'}`} />
@@ -323,21 +363,32 @@ export default function Finder({
                                     )}
 
                                     <div className={`h-px my-1 ${isDark ? 'bg-zinc-800' : 'bg-gray-100'}`} />
+                                    <div className={`h-px my-1 ${isDark ? 'bg-zinc-800' : 'bg-gray-100'}`}/>
+
                                     {onDeleteNode && (
-                                        <button onClick={() => onDeleteNode(contextMenu.targetItem!.id)} className="w-full text-left px-3 py-2 text-red-500 hover:bg-red-500/10 transition-colors">
+                                        <button onClick={() => {
+                                            onDeleteNode(contextMenu.targetItem!.id);
+                                            setContextMenu(prev => prev ? { ...prev, visible: false } : null);
+                                        }}
+                                                className="w-full text-left px-3 py-2 text-xs font-medium text-red-500 hover:bg-red-500/10 transition-colors">
                                             Move to Trash
                                         </button>
                                     )}
                                 </>
-
                             )}
                         </>
                     ) : (
                         /* Натискання на порожнє місце (показуємо створення тільки на диску) */
                         mode === 'drive' && (
                             <>
-                                {onCreateFolder && <button onClick={() => onCreateFolder(currentFolderId)} className={`w-full text-left px-3 py-2 ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}>New Folder</button>}
-                                {onUploadClick && <button onClick={() => onUploadClick(currentFolderId)} className={`w-full text-left px-3 py-2 ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}>Upload Files Here</button>}
+                                {onCreateFolder && <button onClick={() => onCreateFolder(currentFolderId)}
+														   className={`w-full text-left px-3 py-2 ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}>New
+									Folder</button>}
+                                {onUploadClick && <button className={`w-full text-left px-3 py-2 ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}>
+									<Link to={{pathname: "/upload", search: `?${searchParams.toString()}`}}>
+										Upload Files Here
+									</Link>
+								</button>}
                             </>
                         )
                     )}

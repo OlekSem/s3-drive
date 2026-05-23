@@ -1,7 +1,8 @@
-
-
+import {Link, useLocation} from "react-router-dom";
 
 const UploadButton = () => {
+
+    const location = useLocation();
 
     return (
         <div>
@@ -12,7 +13,11 @@ const UploadButton = () => {
             
             `}
             >
-                <a href={"/upload"}>Upload</a></button>
+                {/*<a href={"/upload"}>Upload</a>*/}
+                <Link to={{ pathname: "/upload", search: location.search }}>
+                    Upload
+                </Link>
+            </button>
         </div>
     );
 };
