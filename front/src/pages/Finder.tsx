@@ -527,15 +527,21 @@ export default function Finder({
                             mode === 'drive' && (
                                 <>
                                     {onCreateFolder && (
-                                        <button onClick={() => { onCreateFolder(currentFolderId); setContextMenu(null); }}
-                                                className={`w-full text-left px-3 py-2 ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}>
+                                        <button
+                                            onClick={() => { onCreateFolder(currentFolderId); setContextMenu(null); }}
+                                            className={`w-full text-left px-3 py-2 text-xs font-medium ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}
+                                        >
                                             New Folder
                                         </button>
                                     )}
                                     {onUploadClick && (
-                                        <button onClick={() => { onUploadClick(currentFolderId); setContextMenu(null); }}
-                                                className={`w-full text-left px-3 py-2 ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}>
-                                            Upload File
+                                        <button
+                                            onClick={() => setContextMenu(null)}
+                                            className={`w-full text-left px-3 py-2 text-xs font-medium ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}
+                                        >
+                                            <Link to={{ pathname: "/upload", search: `?${searchParams.toString()}` }} className="block w-full h-full">
+                                                Upload Files Here
+                                            </Link>
                                         </button>
                                     )}
                                 </>
