@@ -26,7 +26,7 @@ export const authService = createApi({
             query: (model)=>{
                 const formData = serialize(model)
                 return {
-                    url: "/register",
+                    url: "register",
                     method: "POST",
                     body: formData,
                 }
