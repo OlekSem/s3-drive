@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.springbootapi.config.MinioProperties;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.beans.factory.annotation.Value; // Import this
 
 import java.io.InputStream;
 import java.net.URLEncoder;
@@ -19,15 +20,26 @@ import java.util.concurrent.TimeUnit;
 @Service
 @RequiredArgsConstructor
 public class MinioService {
-    private final MinioClient minioClient;
 
+    private final MinioClient minioClient;
     private final MinioProperties properties;
+
+    // Inject your new public endpoint from docker-compose
+    @Value("${MINIO_PUBLIC_ENDPOINT:http://18.196.181.175:9000}")
+    private String publicEndpoint;
 
     public String generateDownloadUrl(String storageKey, String originalName) {
         try {
             String contentDisposition = "attachment; filename=\"" + URLEncoder.encode(originalName, StandardCharsets.UTF_8) + "\"";
-            // 1. Generate the raw internal URL (points to http://minio-storage:9000)
-            String internalUrl = minioClient.getPresignedObjectUrl(
+
+            // Re-build a temporary client initialized with the public endpoint
+            // so the generated cryptographic signature naturally expects the public IP!
+            MinioClient signingClient = MinioClient.builder()
+                    .endpoint(publicEndpoint)
+                    .credentials(properties.getAccessKey(), properties.getSecretKey())
+                    .build();
+
+            return signingClient.getPresignedObjectUrl(
                     GetPresignedObjectUrlArgs.builder()
                             .method(Method.GET)
                             .bucket(properties.getBucket())
@@ -36,21 +48,16 @@ public class MinioService {
                             .extraQueryParams(Map.of("response-content-disposition", contentDisposition))
                             .build()
             );
-
-            // 2. FIX: Convert the internal Docker routing host string to the public AWS IP address
-            // This leaves all S3 access signatures completely untouched and working perfectly.
-            System.out.println(internalUrl);
-            return internalUrl.replace("http://minio-storage:9000", "http://18.196.181.175:9000");
         } catch (Exception e) {
             throw new RuntimeException("Error generating presigned download URL", e);
         }
     }
 
     public String uploadFile(MultipartFile file) {
-
         try {
             String fileName = generateFileName(file.getOriginalFilename());
             InputStream inputStream = file.getInputStream();
+            // Uploads still use the internal fast "minioClient" (http://minio-storage:9000)
             minioClient.putObject(
                     PutObjectArgs.builder()
                             .bucket(properties.getBucket())
@@ -63,6 +70,10 @@ public class MinioService {
         } catch (Exception e) {
             throw new RuntimeException("Error uploading file to MinIO", e);
         }
+    }
+
+    public String getFileUrl(String fileName) {
+        return publicEndpoint + "/" + properties.getBucket() + "/" + fileName;
     }
 
     public void deleteFile(String fileName) {

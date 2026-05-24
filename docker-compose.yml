@@ -64,6 +64,7 @@ services:
       - SPRING_JPA_SHOW_SQL=true
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
       - MINIO_ENDPOINT=http://minio-storage:9000 # Stays internal & fast
+      - MINIO_PUBLIC_ENDPOINT=http://18.196.181.175:9000
       - MINIO_ACCESS_KEY=minioadmin
       - MINIO_SECRET_KEY=minioadmin
       - MINIO_BUCKET=s3drive
