@@ -1,0 +1,101 @@
+services:
+  db:
+    image: postgres:latest
+    container_name: s3Drive_db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: mydb
+    volumes:
+      - pg_data:/var/lib/postgresql
+    ports:
+      - "5399:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d mydb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - s3_network
+
+  minio-storage:
+    image: minio/minio
+    container_name: s3Drive_minio_storage
+    restart: unless-stopped
+    ports:
+      - "9000:9000" 
+      - "9001:9001" 
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_SERVER_URL: "http://localhost:9000"
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - s3_network
+
+  api:
+    build:
+      context: ./back
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    container_name: s3Drive_api
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+      minio-storage:
+        condition: service_started
+    environment:
+      - SPRING_APPLICATION_NAME=S3Drive_api
+      - SERVER_PORT=8080
+
+      - APP_CORS_ALLOWED_ORIGINS=http://18.196.181.175,http://localhost,https://18.196.181.175
+
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/mydb
+      - SPRING_DATASOURCE_USERNAME=admin
+      - SPRING_DATASOURCE_PASSWORD=secret
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
+      - SPRING_JPA_OPEN_IN_VIEW=false
+      - SPRING_JPA_PROPERTIES_HIBERNATE_JDBC_TIME_ZONE=UTC
+      - SPRING_JPA_SHOW_SQL=true
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - MINIO_ENDPOINT=http://minio-storage:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+      - MINIO_BUCKET=s3drive
+      - SPRING_WEB_ERROR_INCLUDE_MESSAGE=always
+    volumes:
+      - ./back/uploads:/app/uploads
+    networks:
+      - s3_network
+    
+  frontend:
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+    container_name: s3_frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      # - "443:443"
+    environment:
+      # - VITE_API_BASE_URL=http://18.196.181.175:8080
+      - VITE_API_BASE_URL=http://localhost:8080
+    # volumes:
+    #   - ./certs:/etc/nginx/certs:ro
+    depends_on:
+      - api
+    networks:
+      - s3_network
+
+volumes:
+  pg_data:
+  minio_data:
+
+networks:
+  s3_network:
+    driver: bridge
