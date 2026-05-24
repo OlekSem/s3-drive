@@ -457,11 +457,6 @@ export default function Finder({
                                         {/* ГВАРД БЛОКУВАННЯ: Приховує одиночні дії, якщо вибрано декілька елементів */}
                                         {selectedCount <= 1 && (
                                             <>
-                                                <button onClick={() => handleItemClick(contextMenu.targetItem!)}
-                                                        className={`w-full text-left px-3 py-2 text-xs font-medium ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}>
-                                                    {contextMenu.targetItem!.type === 'FOLDER' ? 'Open Folder' : 'Select File'}
-                                                </button>
-
                                                 {contextMenu.targetItem!.type === 'FILE' && (
                                                     <>
                                                         <button
