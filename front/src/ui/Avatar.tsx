@@ -107,9 +107,6 @@ const Avatar = () => {
                             >
                                 Sign up
                             </button>
-                            <button className="w-full text-left px-3 py-2 rounded-lg hover:bg-[var(--hover-bg)] transition hover:cursor-pointer">
-                                Google
-                            </button>
                         </>
                     )}
                 </div>
