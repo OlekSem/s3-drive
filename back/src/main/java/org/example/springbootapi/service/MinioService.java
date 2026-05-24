@@ -39,6 +39,7 @@ public class MinioService {
 
             // 2. FIX: Convert the internal Docker routing host string to the public AWS IP address
             // This leaves all S3 access signatures completely untouched and working perfectly.
+            System.out.println(internalUrl);
             return internalUrl.replace("http://minio-storage:9000", "http://18.196.181.175:9000");
         } catch (Exception e) {
             throw new RuntimeException("Error generating presigned download URL", e);
