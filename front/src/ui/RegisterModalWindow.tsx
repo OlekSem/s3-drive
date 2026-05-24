@@ -26,7 +26,12 @@ const validationSchema = Yup.object({
     confirmPassword: Yup.string()
         .oneOf([Yup.ref("password")], "Паролі не співпадають")
         .required("Підтвердіть пароль"),
-    avatar: Yup.mixed().nullable(),
+    // FIXED: Changed key from 'avatar' to 'image' and added mandatory requirements
+    image: Yup.mixed()
+        .required("Аватар є обов'язковим")
+        .test("fileRequired", "Будь ласка, виберіть файл зображення", (value) => {
+            return value !== null && value !== undefined && value !== "";
+        }),
 });
 
 interface ModalWindowProps {
