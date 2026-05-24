@@ -79,7 +79,7 @@ services:
       context: ./front
       dockerfile: Dockerfile
       args:
-         - VITE_API_BASE_URL=http://18.196.181.175:8081
+         - VITE_API_BASE_URL=https://18.196.181.175:8081
     container_name: s3_frontend
     restart: unless-stopped
     ports:
