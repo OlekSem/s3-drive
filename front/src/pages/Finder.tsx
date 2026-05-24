@@ -63,17 +63,20 @@ export default function Finder({
 
     useEffect(() => {
         const handleWindowClick = (e: MouseEvent) => {
-            if (e.button !== 0) return; // Реагуємо тільки на ліву кнопку миші
+            if (e.button !== 0) return; // Respond only to left-click
             const clickedInsideMenu = (e.target as HTMLElement).closest('.context-menu-wrapper');
             if (clickedInsideMenu) return;
             setContextMenu(null);
         };
 
-        if (contextMenu?.visible) {
+        if (contextMenu && contextMenu.visible) {
             window.addEventListener('click', handleWindowClick);
         }
-        return () => window.removeEventListener('click', handleWindowClick);
-    }, [contextMenu?.visible]);
+        return () => {
+            window.removeEventListener('click', handleWindowClick);
+        };
+    }, [contextMenu]);
+
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -523,7 +526,10 @@ export default function Finder({
                             /* Натискання на порожнє місце (показуємо створення тільки на диску) */
                             mode === 'drive' && (
                                 <>
-                                    {onCreateFolder && <button onClick={() => onCreateFolder(currentFolderId)}
+                                    {onCreateFolder && <button onClick={() => {
+                                        onCreateFolder(currentFolderId);
+                                        setContextMenu(null);
+                                    }}
 															   className={`w-full text-left px-3 py-2 ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}>
 										New
 										Folder
