@@ -80,3 +80,5 @@ logs/
 *.log
 
 
+# saved files in uploads folder
+uploads/

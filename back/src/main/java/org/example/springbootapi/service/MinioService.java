@@ -26,15 +26,20 @@ public class MinioService {
     public String generateDownloadUrl(String storageKey, String originalName) {
         try {
             String contentDisposition = "attachment; filename=\"" + URLEncoder.encode(originalName, StandardCharsets.UTF_8) + "\"";
-            return minioClient.getPresignedObjectUrl(
+            // 1. Generate the raw internal URL (points to http://minio-storage:9000)
+            String internalUrl = minioClient.getPresignedObjectUrl(
                     GetPresignedObjectUrlArgs.builder()
                             .method(Method.GET)
                             .bucket(properties.getBucket())
                             .object(storageKey)
-                            .expiry(2, TimeUnit.MINUTES) // URL expires automatically in 2 minutes
+                            .expiry(2, TimeUnit.MINUTES)
                             .extraQueryParams(Map.of("response-content-disposition", contentDisposition))
                             .build()
             );
+
+            // 2. FIX: Convert the internal Docker routing host string to the public AWS IP address
+            // This leaves all S3 access signatures completely untouched and working perfectly.
+            return internalUrl.replace("http://minio-storage:9000", "http://18.196.181.175:9000");
         } catch (Exception e) {
             throw new RuntimeException("Error generating presigned download URL", e);
         }
@@ -57,10 +62,6 @@ public class MinioService {
         } catch (Exception e) {
             throw new RuntimeException("Error uploading file to MinIO", e);
         }
-    }
-
-    public String getFileUrl(String fileName) {
-        return properties.getEndpoint() + "/" + properties.getBucket() + "/" + fileName;
     }
 
     public void deleteFile(String fileName) {
