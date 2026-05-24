@@ -297,10 +297,12 @@ export default function Finder({
                         </div>
                     </header>
 
-                    {/* СІТКА ЕЛЕМЕНТІВ */}
-                    <main className="flex-1 p-6 overflow-y-auto grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-6 content-start auto-rows-max">
-                        {activeItems.length === 0 ? (
-                            <div className={`col-span-full text-center py-20 font-medium italic text-sm ${colors.textMuted}`}>
+                    {/* СІТКА ЕЛЕМЕНТІВ — Now a Flex Container */}
+                    {/* This centers the entire grid system horizontally */}
+                    <main className="flex-1 p-6 overflow-y-auto flex flex-wrap justify-center gap-4 content-start">
+
+                    {activeItems.length === 0 ? (
+                            <div className={`w-full text-center py-20 font-medium italic text-sm ${colors.textMuted}`}>
                                 {mode === 'trash' ? 'Trash is empty' : 'Empty folder'}
                             </div>
                         ) : (
@@ -313,7 +315,12 @@ export default function Finder({
                                         onContextMenu={(e) => handleContextMenu(e, item)}
                                         // onClick={() => handleItemClick(item)}
                                         onDoubleClick={() => handleItemDoubleClick(item)}
-                                        className={`flex flex-col items-center p-3 rounded-xl cursor-pointer transition-all duration-150 group select-none finder-node-item relative ${
+                                        /*
+                                          CHANGES MADE HERE:
+                                          - Added 'w-28' (112px) to give items a completely static, unyielding width.
+                                          - Added 'flex-shrink-0' to guarantee the browser never compresses the file item size.
+                                        */
+                                        className={`flex flex-col items-center p-3 w-28 flex-shrink-0 rounded-xl cursor-pointer transition-all duration-150 group select-none finder-node-item relative ${
                                             isItemChecked ? 'bg-blue-500/20 ring-2 ring-blue-500' : colors.itemHover
                                         }`}
                                     >
@@ -329,8 +336,8 @@ export default function Finder({
                                                         isItemChecked ? 'text-blue-500' : 'text-gray-400'
                                                     }`} fill="currentColor" fillOpacity={0.1} />
                                                     <span className={`absolute bottom-1 left-1 border text-[8px] font-bold px-1 py-0.2 rounded uppercase tracking-tight scale-90 group-hover:text-blue-500 transition-colors ${colors.badgeBg} ${colors.textLabel}`}>
-                                                        {item.name.split('.').pop() || 'data'}
-                                                    </span>
+                                    {item.name.split('.').pop() || 'data'}
+                                </span>
                                                 </div>
                                             )}
 
@@ -347,8 +354,8 @@ export default function Finder({
                                         </div>
 
                                         <span className="text-xs text-center w-full break-words line-clamp-2 px-1 font-medium leading-tight">
-                                            {item.name}
-                                        </span>
+                        {item.name}
+                    </span>
                                     </div>
                                 );
                             })

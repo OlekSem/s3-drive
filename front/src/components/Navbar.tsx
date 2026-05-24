@@ -24,8 +24,8 @@ const Navbar = () => {
             className="flex flex-col
             justify-top
             bg-[var(--surface)]
-            w-64 flex-shrink-0 p-6 border-r-2 border-[var(--border)]
-            h-screen sticky top-0
+            w-44 flex-shrink-0 px-4 py-6 border-r-2 border-[var(--border)]
+            h-100% sticky top-0
             "
         >
             <Logo />
