@@ -9,7 +9,7 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql # Added /data for proper postgres persistence
     ports:
-      - "127.0.0.1:5399:5432" # Safe: Only accessible inside the VPS loopback
+      - "5399:5432" # Safe: Only accessible inside the VPS loopback
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U admin -d mydb"]
       interval: 5s
