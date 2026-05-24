@@ -298,7 +298,7 @@ export default function Finder({
 
                     {/* СІТКА ЕЛЕМЕНТІВ — Now a Flex Container */}
                     {/* This centers the entire grid system horizontally */}
-                    <main className="flex-1 p-6 overflow-y-auto flex flex-wrap justify-center gap-4 content-start">
+                    <main className="flex-1 p-6 overflow-y-auto flex flex-wrap justify-start gap-4 content-start">
 
                     {activeItems.length === 0 ? (
                             <div className={`w-full text-center py-20 font-medium italic text-sm ${colors.textMuted}`}>
@@ -457,64 +457,62 @@ export default function Finder({
                                         {contextMenu.targetItem!.type === 'FOLDER' ? 'Open Folder' : 'Select File'}
                                     </button>
 
-                                        {contextMenu.targetItem.type === 'FILE' && (
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleDownload(contextMenu.targetItem!);
-                                                    setContextMenu(null);
-                                                }}
-                                                disabled={isDownloading}
-                                                className={`w-full text-left px-3 py-2 text-xs font-medium ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'} disabled:opacity-50`}
-                                            >
-                                                {isDownloading ? "Downloading..." : "Download"}
-                                            </button>
-                                        )
-                                        &&
-                                            <button
-                                                onClick={() => {
-                                                    handleItemClick(contextMenu.targetItem!);
-                                                    setContextMenu(null);
-                                                }}
-                                                disabled={isDownloading}
-                                                className={`w-full text-left px-3 py-2 text-xs font-medium ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'} disabled:opacity-50`}
-                                            >
-                                                Get Info
-                                            </button>
-                                        }
+                                    {contextMenu.targetItem!.type === 'FILE' && (
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleDownload(contextMenu.targetItem!);
+                                                setContextMenu(null);
+                                            }}
+                                            disabled={isDownloading}
+                                            className={`w-full text-left px-3 py-2 text-xs font-medium ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'} disabled:opacity-50`}
+                                        >
+                                            {isDownloading ? "Downloading..." : "Download"}
+                                        </button>
+                                    )}
 
-                                        <div className={`h-px my-1 ${isDark ? 'bg-zinc-800' : 'bg-gray-100'}`} />
+                                    <button
+                                        onClick={() => {
+                                            handleItemClick(contextMenu.targetItem!);
+                                            setContextMenu(null);
+                                        }}
+                                        className={`w-full text-left px-3 py-2 text-xs font-medium ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}
+                                    >
+                                        Get Info
+                                    </button>
 
-                                        {onRenameNode && (
-                                            <button
-                                                onClick={() => {
-                                                    setRenameTarget(contextMenu.targetItem);
-                                                    setContextMenu(null);
-                                                }}
-                                                className={`w-full text-left px-3 py-2 ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}
-                                            >
-                                                Rename
-                                            </button>
-                                        )}
+                                    <div className={`h-px my-1 ${isDark ? 'bg-zinc-800' : 'bg-gray-100'}`} />
 
-                                        <div className={`h-px my-1 ${isDark ? 'bg-zinc-800' : 'bg-gray-100'}`} />
+                                    {onRenameNode && (
+                                        <button
+                                            onClick={() => {
+                                                setRenameTarget(contextMenu.targetItem);
+                                                setContextMenu(null);
+                                            }}
+                                            className={`w-full text-left px-3 py-2 text-xs font-medium ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}
+                                        >
+                                            Rename
+                                        </button>
+                                    )}
 
-                                        {onDeleteNode && (
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    const idsToDelete = getTargetIds(contextMenu.targetItem);
-                                                    onDeleteNode(idsToDelete);
-                                                    setSelectedIds({});
-                                                    setContextMenu(null);
-                                                }}
-                                                className="w-full text-left px-3 py-2 text-red-500 hover:bg-red-500/10 transition-colors flex items-center gap-1.5"
-                                            >
-                                                <Trash2 size={12} /> {selectedCount > 1 ? `Move ${selectedCount} items to Trash` : 'Move to Trash'}
-                                            </button>
-                                        )}
-                                    </>
-                                )}
+                                    <div className={`h-px my-1 ${isDark ? 'bg-zinc-800' : 'bg-gray-100'}`} />
+
+                                    {onDeleteNode && (
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                const idsToDelete = getTargetIds(contextMenu.targetItem);
+                                                onDeleteNode(idsToDelete);
+                                                setSelectedIds({});
+                                                setContextMenu(null);
+                                            }}
+                                            className="w-full text-left px-3 py-2 text-xs font-medium text-red-500 hover:bg-red-500/10 transition-colors flex items-center gap-1.5"
+                                        >
+                                            <Trash2 size={12} /> {selectedCount > 1 ? `Move ${selectedCount} items to Trash` : 'Move to Trash'}
+                                        </button>
+                                    )}
+                                </>
+                            )}
                             </>
                         ) : (
                             /* Натискання на порожнє місце (показуємо створення тільки на диску) */
