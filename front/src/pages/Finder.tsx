@@ -463,28 +463,30 @@ export default function Finder({
                                                 </button>
 
                                                 {contextMenu.targetItem!.type === 'FILE' && (
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleDownload(contextMenu.targetItem!);
-                                                            setContextMenu(null);
-                                                        }}
-                                                        disabled={isDownloading}
-                                                        className={`w-full text-left px-3 py-2 text-xs font-medium ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'} disabled:opacity-50`}
-                                                    >
-                                                        {isDownloading ? "Downloading..." : "Download"}
-                                                    </button>
-                                                )}
+                                                    <>
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleDownload(contextMenu.targetItem!);
+                                                                setContextMenu(null);
+                                                            }}
+                                                            disabled={isDownloading}
+                                                            className={`w-full text-left px-3 py-2 text-xs font-medium ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'} disabled:opacity-50`}
+                                                        >
+                                                            {isDownloading ? "Downloading..." : "Download"}
+                                                        </button>
 
-                                                <button
-                                                    onClick={() => {
-                                                        handleItemClick(contextMenu.targetItem!);
-                                                        setContextMenu(null);
-                                                    }}
-                                                    className={`w-full text-left px-3 py-2 text-xs font-medium ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}
-                                                >
-                                                    Get Info
-                                                </button>
+                                                        <button
+                                                            onClick={() => {
+                                                                handleItemClick(contextMenu.targetItem!);
+                                                                setContextMenu(null);
+                                                            }}
+                                                            className={`w-full text-left px-3 py-2 text-xs font-medium ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}
+                                                        >
+                                                            Get Info
+                                                        </button>
+                                                    </>
+                                                )}
 
                                                 <div className={`h-px my-1 ${isDark ? 'bg-zinc-800' : 'bg-gray-100'}`} />
 
@@ -526,14 +528,12 @@ export default function Finder({
                             /* Натискання на порожнє місце (показуємо створення тільки на диску) */
                             mode === 'drive' && (
                                 <>
-                                    {onCreateFolder && (
-                                        <button
-                                            onClick={() => { onCreateFolder(currentFolderId); setContextMenu(null); }}
-                                            className={`w-full text-left px-3 py-2 text-xs font-medium ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}
-                                        >
-                                            New Folder
-                                        </button>
-                                    )}
+                                    {onCreateFolder && <button onClick={() => onCreateFolder(currentFolderId)}
+															   className={`w-full text-left px-3 py-2 ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}>
+										New
+										Folder
+									</button>
+                                    }
                                     {onUploadClick && (
                                         <button
                                             onClick={() => setContextMenu(null)}
