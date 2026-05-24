@@ -10,13 +10,13 @@ import {useAppDispatch} from "../hooks/redux.ts";
 import {loginSuccess} from "../store/reducers/AuthSlice.ts";
 import type ILoginModel from "../models/ILoginModel.ts";
 
-type RegisterTextValues = Omit<IRegisterModel, "avatar">;
+type RegisterTextValues = Omit<IRegisterModel, "image">;
 const initialValues: IRegisterModel = {
     username: "",
     email: "",
     password: "",
     confirmPassword: "",
-    avatar: null,
+    image: null,
 };
 
 const validationSchema = Yup.object({
@@ -40,6 +40,7 @@ const RegisterModalWindow: FC<ModalWindowProps> = ({ isOpen, closeModal }) => {
     const dispatch = useAppDispatch();
     if (!isOpen) return null;
     const handleSubmit = async (values: IRegisterModel) => {
+        console.log(values)
         const { email } = await register(values).unwrap();
         const model: ILoginModel = { email, password: values.password };
         const result = await login(model).unwrap();
@@ -113,7 +114,7 @@ const RegisterModalWindow: FC<ModalWindowProps> = ({ isOpen, closeModal }) => {
                         placeholder="••••••••"
                     />
                     <FormikFileInput<IRegisterModel>
-                        name="avatar"
+                        name="image"
                         label="Avatar"
                     />
                 </UniversalForm>
