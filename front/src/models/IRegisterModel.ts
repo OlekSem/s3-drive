@@ -3,5 +3,5 @@ export default interface IRegisterModel {
     email: string;
     password: string;
     confirmPassword: string;
-    avatar:  File | null;
+    image:  File | null;
 }
