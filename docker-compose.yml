@@ -53,7 +53,7 @@ services:
       - SPRING_APPLICATION_NAME=S3Drive_api
       - SERVER_PORT=8080
       # Include port 8081 and 8082 variations for accurate cross-origin handshakes
-      - APP_CORS_ALLOWED_ORIGINS=http://s3-drive.numexa.online,https://s3-drive.numexa.online,http://18.196.181.175,http://localhost,https://18.196.181.175,http://18.196.181.175:8082
+      - APP_CORS_ALLOWED_ORIGINS=https://api.s3-drive.numexa.online,http://s3-drive.numexa.online,https://s3-drive.numexa.online,http://18.196.181.175,http://localhost,https://18.196.181.175,http://18.196.181.175:8082
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/mydb
       - SPRING_DATASOURCE_USERNAME=admin
       - SPRING_DATASOURCE_PASSWORD=secret
