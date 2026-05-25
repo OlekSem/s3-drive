@@ -77,11 +77,11 @@ const Avatar = () => {
                 >
                     {user ? (
                         <>
-                            <div className="px-3 py-1.5 text-xs text-gray-400 border-b border-[var(--border-color)] mb-1 truncate">
+                            <div className="px-3 py-1.5 text-xs text-gray-400 dark:text-zinc-500 border-b border-[var(--border-color)] dark:border-zinc-800 mb-1 truncate">
                                 {user.username}
                             </div>
                             <button
-                                className="w-full text-left px-3 py-2 rounded-lg hover:bg-red-500/10 text-red-500 font-medium transition hover:cursor-pointer"
+                                className="w-full text-left px-3 py-2 text-xs rounded-lg text-red-500 dark:text-red-400 font-medium hover:bg-red-500/10 dark:hover:bg-red-500/20 transition hover:cursor-pointer"
                                 onClick={handleLogout}
                             >
                                 Вийти
@@ -90,7 +90,7 @@ const Avatar = () => {
                     ) : (
                         <>
                             <button
-                                className="w-full text-left px-3 py-2 rounded-lg hover:bg-[var(--hover-bg)] transition hover:cursor-pointer"
+                                className="w-full text-left px-3 py-2 text-xs text-gray-700 dark:text-zinc-200 rounded-lg hover:bg-[var(--hover-bg)] dark:hover:bg-[#25252e] transition hover:cursor-pointer"
                                 onClick={() => {
                                     loginModal.openModal();
                                     setOpen(false);
@@ -99,16 +99,13 @@ const Avatar = () => {
                                 Log in
                             </button>
                             <button
-                                className="w-full text-left px-3 py-2 rounded-lg hover:bg-[var(--hover-bg)] transition hover:cursor-pointer"
+                                className="w-full text-left px-3 py-2 text-xs text-gray-700 dark:text-zinc-200 rounded-lg hover:bg-[var(--hover-bg)] dark:hover:bg-[#25252e] transition hover:cursor-pointer"
                                 onClick={() => {
                                     registerModal.openModal();
                                     setOpen(false);
                                 }}
                             >
                                 Sign up
-                            </button>
-                            <button className="w-full text-left px-3 py-2 rounded-lg hover:bg-[var(--hover-bg)] transition hover:cursor-pointer">
-                                Google
                             </button>
                         </>
                     )}

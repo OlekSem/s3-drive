@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.springbootapi.config.MinioProperties;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.beans.factory.annotation.Value; // Import this
 
 import java.io.InputStream;
 import java.net.URLEncoder;
@@ -19,19 +20,31 @@ import java.util.concurrent.TimeUnit;
 @Service
 @RequiredArgsConstructor
 public class MinioService {
-    private final MinioClient minioClient;
 
+    private final MinioClient minioClient;
     private final MinioProperties properties;
+
+    // Inject your new public endpoint from docker-compose
+    @Value("${MINIO_PUBLIC_ENDPOINT:http://18.196.181.175:9000}")
+    private String publicEndpoint;
 
     public String generateDownloadUrl(String storageKey, String originalName) {
         try {
             String contentDisposition = "attachment; filename=\"" + URLEncoder.encode(originalName, StandardCharsets.UTF_8) + "\"";
-            return minioClient.getPresignedObjectUrl(
+
+            // Re-build a temporary client initialized with the public endpoint
+            // so the generated cryptographic signature naturally expects the public IP!
+            MinioClient signingClient = MinioClient.builder()
+                    .endpoint(publicEndpoint)
+                    .credentials(properties.getAccessKey(), properties.getSecretKey())
+                    .build();
+
+            return signingClient.getPresignedObjectUrl(
                     GetPresignedObjectUrlArgs.builder()
                             .method(Method.GET)
                             .bucket(properties.getBucket())
                             .object(storageKey)
-                            .expiry(2, TimeUnit.MINUTES) // URL expires automatically in 2 minutes
+                            .expiry(2, TimeUnit.MINUTES)
                             .extraQueryParams(Map.of("response-content-disposition", contentDisposition))
                             .build()
             );
@@ -41,10 +54,10 @@ public class MinioService {
     }
 
     public String uploadFile(MultipartFile file) {
-
         try {
             String fileName = generateFileName(file.getOriginalFilename());
             InputStream inputStream = file.getInputStream();
+            // Uploads still use the internal fast "minioClient" (http://minio-storage:9000)
             minioClient.putObject(
                     PutObjectArgs.builder()
                             .bucket(properties.getBucket())
@@ -60,7 +73,7 @@ public class MinioService {
     }
 
     public String getFileUrl(String fileName) {
-        return properties.getEndpoint() + "/" + properties.getBucket() + "/" + fileName;
+        return publicEndpoint + "/" + properties.getBucket() + "/" + fileName;
     }
 
     public void deleteFile(String fileName) {

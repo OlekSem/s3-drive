@@ -1,0 +1,99 @@
+services:
+  db:
+    image: postgres:latest
+    container_name: s3Drive_db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: mydb
+    volumes:
+      - pg_data:/var/lib/postgresql # Added /data for proper postgres persistence
+    ports:
+      - "5399:5432" # Safe: Only accessible inside the VPS loopback
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d mydb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - s3_network
+
+  minio-storage:
+    image: minio/minio
+    container_name: s3Drive_minio_storage
+    restart: unless-stopped
+    ports:
+      - "9000:9000" # Keeps MinIO API accessible to your host Nginx / public browser
+      - "127.0.0.1:9001:9001" # Dashboard accessible via safe localhost tunnel
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+
+      MINIO_SERVER_URL: "https://minio-s3-drive.numexa.online"
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - s3_network
+
+  api:
+    build:
+      context: ./back
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    container_name: s3Drive_api
+    ports:
+      - "127.0.0.1:8081:8080" # Maps public VPS port 8081 to container port 8080
+    depends_on:
+      db:
+        condition: service_healthy
+      minio-storage:
+        condition: service_started
+    environment:
+      - SPRING_APPLICATION_NAME=S3Drive_api
+      - SERVER_PORT=8080
+      # Include port 8081 and 8082 variations for accurate cross-origin handshakes
+      #      - APP_CORS_ALLOWED_ORIGINS=https://api-s3-drive.numexa.online,http://s3-drive.numexa.online,https://s3-drive.numexa.online,http://18.196.181.175,http://localhost,https://18.196.181.175,http://18.196.181.175:8082
+      - APP_CORS_ALLOWED_ORIGINS=https://s3-drive.numexa.online
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/mydb
+      - SPRING_DATASOURCE_USERNAME=admin
+      - SPRING_DATASOURCE_PASSWORD=secret
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
+      - SPRING_JPA_OPEN_IN_VIEW=false
+      - SPRING_JPA_PROPERTIES_HIBERNATE_JDBC_TIME_ZONE=UTC
+      - SPRING_JPA_SHOW_SQL=true
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - MINIO_ENDPOINT=http://minio-storage:9000 # Stays internal & fast
+      - MINIO_PUBLIC_ENDPOINT=https://minio-s3-drive.numexa.online
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+      - MINIO_BUCKET=s3drive
+      - SPRING_WEB_ERROR_INCLUDE_MESSAGE=always
+    volumes:
+      - ./back/uploads:/app/uploads
+    networks:
+      - s3_network
+
+  frontend:
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+      args:
+         - VITE_API_BASE_URL=https://api-s3-drive.numexa.online
+    container_name: s3_frontend
+    restart: unless-stopped
+    ports:
+      - "8082:80" # CORRECTED: Shifted host port to 8082 to avoid the port 80 crash
+    depends_on:
+      - api
+    networks:
+      - s3_network
+
+volumes:
+  pg_data:
+  minio_data:
+
+networks:
+  s3_network:
+    driver: bridge

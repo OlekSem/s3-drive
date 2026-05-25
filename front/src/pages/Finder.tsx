@@ -35,7 +35,6 @@ export default function Finder({
                                    onCreateFolder,
                                    onDeleteNode,
                                    onDeletePermanently,
-                                   onRestoreNode,
                                    onRenameNode,
                                    onUploadClick
                                }: FinderProps) {
@@ -64,17 +63,20 @@ export default function Finder({
 
     useEffect(() => {
         const handleWindowClick = (e: MouseEvent) => {
-            if (e.button !== 0) return; // Реагуємо тільки на ліву кнопку миші
+            if (e.button !== 0) return; // Respond only to left-click
             const clickedInsideMenu = (e.target as HTMLElement).closest('.context-menu-wrapper');
             if (clickedInsideMenu) return;
             setContextMenu(null);
         };
 
-        if (contextMenu?.visible) {
+        if (contextMenu && contextMenu.visible) {
             window.addEventListener('click', handleWindowClick);
         }
-        return () => window.removeEventListener('click', handleWindowClick);
-    }, [contextMenu?.visible]);
+        return () => {
+            window.removeEventListener('click', handleWindowClick);
+        };
+    }, [contextMenu]);
+
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -297,10 +299,12 @@ export default function Finder({
                         </div>
                     </header>
 
-                    {/* СІТКА ЕЛЕМЕНТІВ */}
-                    <main className="flex-1 p-6 overflow-y-auto grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-6 content-start auto-rows-max">
-                        {activeItems.length === 0 ? (
-                            <div className={`col-span-full text-center py-20 font-medium italic text-sm ${colors.textMuted}`}>
+                    {/* СІТКА ЕЛЕМЕНТІВ — Now a Flex Container */}
+                    {/* This centers the entire grid system horizontally */}
+                    <main className="flex-1 p-6 overflow-y-auto flex flex-wrap justify-start gap-4 content-start">
+
+                    {activeItems.length === 0 ? (
+                            <div className={`w-full text-center py-20 font-medium italic text-sm ${colors.textMuted}`}>
                                 {mode === 'trash' ? 'Trash is empty' : 'Empty folder'}
                             </div>
                         ) : (
@@ -313,7 +317,12 @@ export default function Finder({
                                         onContextMenu={(e) => handleContextMenu(e, item)}
                                         // onClick={() => handleItemClick(item)}
                                         onDoubleClick={() => handleItemDoubleClick(item)}
-                                        className={`flex flex-col items-center p-3 rounded-xl cursor-pointer transition-all duration-150 group select-none finder-node-item relative ${
+                                        /*
+                                          CHANGES MADE HERE:
+                                          - Added 'w-28' (112px) to give items a completely static, unyielding width.
+                                          - Added 'flex-shrink-0' to guarantee the browser never compresses the file item size.
+                                        */
+                                        className={`flex flex-col items-center p-3 w-28 flex-shrink-0 rounded-xl cursor-pointer transition-all duration-150 group select-none finder-node-item relative ${
                                             isItemChecked ? 'bg-blue-500/20 ring-2 ring-blue-500' : colors.itemHover
                                         }`}
                                     >
@@ -329,8 +338,8 @@ export default function Finder({
                                                         isItemChecked ? 'text-blue-500' : 'text-gray-400'
                                                     }`} fill="currentColor" fillOpacity={0.1} />
                                                     <span className={`absolute bottom-1 left-1 border text-[8px] font-bold px-1 py-0.2 rounded uppercase tracking-tight scale-90 group-hover:text-blue-500 transition-colors ${colors.badgeBg} ${colors.textLabel}`}>
-                                                        {item.name.split('.').pop() || 'data'}
-                                                    </span>
+                                    {item.name.split('.').pop() || 'data'}
+                                </span>
                                                 </div>
                                             )}
 
@@ -347,8 +356,8 @@ export default function Finder({
                                         </div>
 
                                         <span className="text-xs text-center w-full break-words line-clamp-2 px-1 font-medium leading-tight">
-                                            {item.name}
-                                        </span>
+                        {item.name}
+                    </span>
                                     </div>
                                 );
                             })
@@ -404,9 +413,11 @@ export default function Finder({
                 {contextMenu && contextMenu.visible && (
                     <div
                         style={{ top: contextMenu.y, left: contextMenu.x }}
-                        className={`${contextMenu.targetItem ? 'fixed z-50 w-52 py-1 rounded-lg shadow-xl border text-xs select-none backdrop-blur-md context-menu-wrapper ${isDark ? \'bg-[#1b1b22]/95 border-[#2c2c3a] text-gray-200\' : \'bg-white/95 border-gray-200 text-gray-800\'}' : (mode==="trash" ? 'none' : 'fixed z-50 w-52 py-1 rounded-lg shadow-xl border text-xs select-none backdrop-blur-md context-menu-wrapper ${isDark ? \'bg-[#1b1b22]/95 border-[#2c2c3a] text-gray-200\' : \'bg-white/95 border-gray-200 text-gray-800\'}')}
-                        
-                        `}
+                        className={`fixed z-50 w-52 py-1 rounded-lg shadow-xl border text-xs select-none backdrop-blur-md context-menu-wrapper ${
+                            !contextMenu.targetItem && mode === 'trash' ? 'hidden' : ''
+                        } ${
+                            isDark ? 'bg-[#1b1b22]/95 border-[#2c2c3a] text-gray-200' : 'bg-white/95 border-gray-200 text-gray-800'
+                        }`}
                     >
                         {contextMenu.targetItem ? (
                             <>
@@ -414,85 +425,86 @@ export default function Finder({
                                     {selectedCount > 1 ? `Selected ${selectedCount} items` : contextMenu.targetItem.name}
                                 </div>
 
-                            {/* Якщо ми в СМІТНИКУ */}
-                            {mode === 'trash' ? (
-                                <>
-                                    <button
-                                        onClick={() => {
-                                            restore(getTargetIds(contextMenu.targetItem));
-                                            setSelectedIds({});
-                                            setContextMenu(null);
-                                        }}
-                                        className={`w-full text-left px-3 py-2 flex items-center gap-2 transition-colors ${isDark ? 'hover:bg-blue-600/30 text-blue-400' : 'hover:bg-blue-50 text-blue-600'}`}
-                                    >
-                                        <RefreshCw size={12} /> Restore Item
-                                    </button>
-                                    <div className={`h-px my-1 ${isDark ? 'bg-zinc-800' : 'bg-gray-100'}`} />
-                                    {onDeletePermanently && (
+                                {/* Якщо ми в СМІТНИКУ */}
+                                {mode === 'trash' ? (
+                                    <>
                                         <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                const ids = getTargetIds(contextMenu.targetItem);
-                                                onDeletePermanently(ids);
+                                            onClick={() => {
+                                                restore(getTargetIds(contextMenu.targetItem));
                                                 setSelectedIds({});
                                                 setContextMenu(null);
                                             }}
-                                            className="w-full text-left px-3 py-2 text-red-500 font-semibold hover:bg-red-500/10 transition-colors"
+                                            className={`w-full text-left px-3 py-2 flex items-center gap-2 transition-colors ${isDark ? 'hover:bg-blue-600/30 text-blue-400' : 'hover:bg-blue-50 text-blue-600'}`}
                                         >
-                                            {selectedCount > 1 ? `Delete ${selectedCount} items permanently` : 'Delete permanently'}
+                                            <RefreshCw size={12} /> {selectedCount > 1 ? `Restore ${selectedCount} items` : 'Restore'}
                                         </button>
-                                    )}
-                                </>
-                            ) : (
-                                /* Якщо ми на звичайному ДИСКУ */
-                                <>
-                                    <button onClick={() => handleItemClick(contextMenu.targetItem!)}
-                                            className={`w-full text-left px-3 py-2 text-xs font-medium ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}>
-                                        {contextMenu.targetItem!.type === 'FOLDER' ? 'Open Folder' : 'Select File'}
-                                    </button>
-
-                                        {contextMenu.targetItem.type === 'FILE' && (
+                                        <div className={`h-px my-1 ${isDark ? 'bg-zinc-800' : 'bg-gray-100'}`} />
+                                        {onDeletePermanently && (
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    handleDownload(contextMenu.targetItem!);
+                                                    const ids = getTargetIds(contextMenu.targetItem);
+                                                    onDeletePermanently(ids);
+                                                    setSelectedIds({});
                                                     setContextMenu(null);
                                                 }}
-                                                disabled={isDownloading}
-                                                className={`w-full text-left px-3 py-2 text-xs font-medium ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'} disabled:opacity-50`}
+                                                className="w-full text-left px-3 py-2 text-red-500 font-semibold hover:bg-red-500/10 transition-colors"
                                             >
-                                                {isDownloading ? "Downloading..." : "Download"}
-                                            </button>
-                                        )
-                                        &&
-                                            <button
-                                                onClick={() => {
-                                                    handleItemClick(contextMenu.targetItem!);
-                                                    setContextMenu(null);
-                                                }}
-                                                disabled={isDownloading}
-                                                className={`w-full text-left px-3 py-2 text-xs font-medium ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'} disabled:opacity-50`}
-                                            >
-                                                Get Info
-                                            </button>
-                                        }
-
-                                        <div className={`h-px my-1 ${isDark ? 'bg-zinc-800' : 'bg-gray-100'}`} />
-
-                                        {onRenameNode && (
-                                            <button
-                                                onClick={() => {
-                                                    setRenameTarget(contextMenu.targetItem);
-                                                    setContextMenu(null);
-                                                }}
-                                                className={`w-full text-left px-3 py-2 ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}
-                                            >
-                                                Rename
+                                                {selectedCount > 1 ? `Delete ${selectedCount} items permanently` : 'Delete permanently'}
                                             </button>
                                         )}
+                                    </>
+                                ) : (
+                                    /* Якщо ми на звичайному ДИСКУ */
+                                    <>
+                                        {/* ГВАРД БЛОКУВАННЯ: Приховує одиночні дії, якщо вибрано декілька елементів */}
+                                        {selectedCount <= 1 && (
+                                            <>
+                                                {contextMenu.targetItem!.type === 'FILE' && (
+                                                    <>
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleDownload(contextMenu.targetItem!);
+                                                                setContextMenu(null);
+                                                            }}
+                                                            disabled={isDownloading}
+                                                            className={`w-full text-left px-3 py-2 text-xs font-medium ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'} disabled:opacity-50`}
+                                                        >
+                                                            {isDownloading ? "Downloading..." : "Download"}
+                                                        </button>
 
-                                        <div className={`h-px my-1 ${isDark ? 'bg-zinc-800' : 'bg-gray-100'}`} />
+                                                        <button
+                                                            onClick={() => {
+                                                                handleItemClick(contextMenu.targetItem!);
+                                                                setContextMenu(null);
+                                                            }}
+                                                            className={`w-full text-left px-3 py-2 text-xs font-medium ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}
+                                                        >
+                                                            Get Info
+                                                        </button>
+                                                    </>
+                                                )}
 
+                                                <div className={`h-px my-1 ${isDark ? 'bg-zinc-800' : 'bg-gray-100'}`} />
+
+                                                {onRenameNode && (
+                                                    <button
+                                                        onClick={() => {
+                                                            setRenameTarget(contextMenu.targetItem);
+                                                            setContextMenu(null);
+                                                        }}
+                                                        className={`w-full text-left px-3 py-2 text-xs font-medium ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}
+                                                    >
+                                                        Rename
+                                                    </button>
+                                                )}
+
+                                                <div className={`h-px my-1 ${isDark ? 'bg-zinc-800' : 'bg-gray-100'}`} />
+                                            </>
+                                        )}
+
+                                        {/* Ця дія завжди доступна і для одного, і для багатьох елементів */}
                                         {onDeleteNode && (
                                             <button
                                                 onClick={(e) => {
@@ -502,7 +514,7 @@ export default function Finder({
                                                     setSelectedIds({});
                                                     setContextMenu(null);
                                                 }}
-                                                className="w-full text-left px-3 py-2 text-red-500 hover:bg-red-500/10 transition-colors flex items-center gap-1.5"
+                                                className="w-full text-left px-3 py-2 text-xs font-medium text-red-500 hover:bg-red-500/10 transition-colors flex items-center gap-1.5"
                                             >
                                                 <Trash2 size={12} /> {selectedCount > 1 ? `Move ${selectedCount} items to Trash` : 'Move to Trash'}
                                             </button>
@@ -514,18 +526,25 @@ export default function Finder({
                             /* Натискання на порожнє місце (показуємо створення тільки на диску) */
                             mode === 'drive' && (
                                 <>
-                                    {onCreateFolder && <button onClick={() => onCreateFolder(currentFolderId)}
-                                                               className={`w-full text-left px-3 py-2 ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}>
-                                        New
-                                        Folder
-                                    </button>
+                                    {onCreateFolder && <button onClick={() => {
+                                        onCreateFolder(currentFolderId);
+                                        setContextMenu(null);
+                                    }}
+															   className={`w-full text-left px-3 py-2 ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}>
+										New
+										Folder
+									</button>
                                     }
-                                    {onUploadClick && <button className={`w-full text-left px-3 py-2 ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}>
-                                        <Link to={{pathname: "/upload", search: `?${searchParams.toString()}`}}>
-                                            Upload Files Here
-                                        </Link>
-                                    </button>
-                                    }
+                                    {onUploadClick && (
+                                        <button
+                                            onClick={() => setContextMenu(null)}
+                                            className={`w-full text-left px-3 py-2 text-xs font-medium ${isDark ? 'hover:bg-[#25252e]' : 'hover:bg-gray-100'}`}
+                                        >
+                                            <Link to={{ pathname: "/upload", search: `?${searchParams.toString()}` }} className="block w-full h-full">
+                                                Upload Files Here
+                                            </Link>
+                                        </button>
+                                    )}
                                 </>
                             )
                         )}

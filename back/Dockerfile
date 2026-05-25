@@ -1,4 +1,4 @@
-FROM maven:3.8.4-openjdk-17 AS builder
+FROM maven:3.9-eclipse-temurin-17-noble AS build
 
 WORKDIR /app
 
@@ -7,22 +7,19 @@ RUN mvn dependency:go-offline
 
 COPY src ./src
 
+RUN mkdir -p /app/uploads
+
 RUN mvn clean package -DskipTests
 
 
-FROM eclipse-temurin:17-jre
+FROM eclipse-temurin:17-jre-noble
 
 WORKDIR /app
 
-COPY --from=builder /app/target/*.jar app.jar
+EXPOSE 8080
 
-# seed folder
-COPY uploads /seed/files
+VOLUME /app/uploads
 
-# entrypoint script
-COPY docker-entrypoint.sh /docker-entrypoint.sh
-RUN chmod +x /docker-entrypoint.sh
+COPY --from=build /app/target/*.jar app.jar
 
-EXPOSE 8081
-
-ENTRYPOINT ["/docker-entrypoint.sh"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
