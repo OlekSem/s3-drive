@@ -34,14 +34,16 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         // Parses the comma-separated string into a clean List structure
-        List<String> originsList = Arrays.stream(allowedOrigins.split(","))
-                .map(String::trim)
-                .toList();
-        config.setAllowedOrigins(originsList);
+//        List<String> originsList = Arrays.stream(allowedOrigins.split(","))
+//                .map(String::trim)
+//                .toList();
+//        config.setAllowedOrigins(originsList);
+        config.setAllowedOrigins(List.of("https://s3-drive.numexa.online"));
 
         // Explicitly list all methods to ensure preflight compatibility on AWS
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        config.setAllowedHeaders(List.of("*"));
+//        config.setAllowedHeaders(List.of("*"));
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Cache-Control", "X-Requested-With"));
         config.setExposedHeaders(List.of("Authorization")); // Necessary for your JWT setup
         config.setAllowCredentials(true);
 
